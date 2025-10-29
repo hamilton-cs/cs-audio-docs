@@ -5,3 +5,4 @@ document.querySelectorAll('.sidebar a').forEach(anchor => {
     target.scrollIntoView({ behavior: 'smooth' });
   });
 });
+
