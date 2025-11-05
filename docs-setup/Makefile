@@ -14,6 +14,18 @@ help:
 
 .PHONY: help Makefile
 
+# Custom HTML target that builds directly into the repo root
+html:
+	@echo "Building HTML into ../html (repo root)..."
+	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "../docs" $(SPHINXOPTS)
+	@echo "Build finished. The HTML pages are in ../html"
+
+# Clean target that removes the generated files in the repo root
+clean:
+	@echo "Cleaning up generated HTML and doctree files..."
+	@rm -rf ../docs
+	@echo "Clean complete."
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
