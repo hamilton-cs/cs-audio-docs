@@ -18,6 +18,7 @@ help:
 html:
 	@echo "Building HTML into ../html (repo root)..."
 	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "../docs" $(SPHINXOPTS)
+	@touch ../docs/.nojekyll
 	@echo "Build finished. The HTML pages are in ../html"
 
 # Clean target that removes the generated files in the repo root
