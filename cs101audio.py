@@ -537,8 +537,14 @@ class Audio():
         Creates an AudioViewer object, which creates a Tkinter window
         with visualization options for two audios at once.
         """
-        pass
+        if not isinstance(other, Audio):
+            raise TypeError("\nThe parameter '" + "other" + "' should be a " +
+                            str(Audio.__name__) +
+                            " but instead was a " +
+                            str(type(other).__name__) + "\n" +
+                            "other" + " = " + str(other))
 
+        DualAudioViewer(self, other)
 
 class AudioViewer:
     """
@@ -740,6 +746,147 @@ class AudioViewer:
             f"Peak amplitude: {max_amp}\nTime: {timestamp:.3f} s"
         )
 
+class DualAudioViewer:
+    """
+    GUI class for displaying and comparing two audio waveforms (Audio1 in Blue, 
+    Audio2 in Red) with options for full waveform and zoomed waveform.
+    """
+    FULL_PLOT_POSITION = 111 
+
+    def __init__(self, audio_obj1, audio_obj2):
+        """
+        Initializes the DualAudioViewer object for two Audio objects.
+
+        Arguments:
+        audio_obj1 -- The first Audio object (plotted in blue)
+        audio_obj2 -- The second Audio object (plotted in red)
+        """
+        # --- Data Extraction and Validation ---
+        
+        # Audio 1 Data
+        self._samples1 = np.array(audio_obj1.get_sample_list(), dtype=np.int16)
+        self._rate = audio_obj1.get_frame_rate()
+        self._name1 = getattr(audio_obj1, 'name', 'Audio 1 (Blue)')
+        
+        # Audio 2 Data
+        self._samples2 = np.array(audio_obj2.get_sample_list(), dtype=np.int16)
+        self._name2 = getattr(audio_obj2, 'name', 'Audio 2 (Red)')
+
+        # Basic Check
+        if len(self._samples1) == 0 or len(self._samples2) == 0:
+            messagebox.showwarning("No Data", "One or both audio segments are empty.")
+            return
+
+        # --- Tkinter setup ---
+        self._root = tk.Tk()
+        self._root.title("Dual Waveform Comparison Viewer")
+
+        # Figure + canvas setup
+        self._fig = Figure(figsize=(10, 5), dpi=100)
+        self._ax = self._fig.add_subplot(DualAudioViewer.FULL_PLOT_POSITION)
+        
+        self._canvas = FigureCanvasTkAgg(self._fig, master=self._root)
+        self._canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        # Controls and main loop
+        self.make_controls()
+
+        self._root.mainloop()
+
+    def make_controls(self):
+        """
+        Creates the control buttons and input fields for the Tkinter interface.
+        """
+        controls = tk.Frame(self._root)
+        controls.pack(pady=10)
+
+        # 1. Full Waveform Button
+        tk.Button(controls, text="Full Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=10)
+
+        # 2. Zoomed Waveform Controls
+        tk.Label(controls, text="Start (s):").grid(row=0, column=1, padx=5)
+        self.entry_start = tk.Entry(controls, width=6)
+        self.entry_start.grid(row=0, column=2)
+
+        tk.Label(controls, text="End (s):").grid(row=0, column=3, padx=5)
+        self.entry_end = tk.Entry(controls, width=6)
+        self.entry_end.grid(row=0, column=4)
+        
+        tk.Button(controls, text="Zoom Waveform", command=self.plot_zoom).grid(row=0, column=5, padx=10)
+        
+        # Legend/Color Key Display
+        tk.Label(controls, fg="darkblue", font=('Arial', 10, 'bold')).grid(row=1, columnspan=6, pady=5)
+
+    def _plot_dual(self, y1, y2, x, title):
+        """
+        Helper function to display two datasets on the existing Matplotlib canvas.
+        """
+        self._ax.clear()
+        
+        # Plot Audio 1 (Blue)
+        # We plot the data against the full time axis 'x'
+        self._ax.plot(x[:len(y1)], y1, linewidth=0.5, color="blue", label=self._name1)
+        
+        # Plot Audio 2 (Red)
+        # The shorter line will naturally end at its last index
+        self._ax.plot(x[:len(y2)], y2, linewidth=0.5, color="red", label=self._name2)
+
+        self._ax.set_xlabel("Time (s)")
+        self._ax.set_ylabel("Amplitude")
+        self._ax.set_title(title)
+        self._ax.grid(True)
+        self._ax.legend(loc='upper right') # Show the label key
+        self._canvas.draw_idle()
+
+    def plot_waveform(self):
+        """
+        Displays the complete, overlaid waveform of both audio signals.
+        """
+        rate = self._rate
+        
+        # Use the maximum sample count for the time axis length
+        max_samples = max(len(self._samples1), len(self._samples2))
+        duration = max_samples / rate
+        x = np.linspace(0, duration, num=max_samples)
+
+        self._plot_dual(self._samples1, self._samples2, x, "Full Overlaid Waveforms")
+
+    def plot_zoom(self):
+        """
+        Displays a zoomed-in, overlaid waveform for a specified time interval.
+        """
+        try:
+            start_sec = float(self.entry_start.get())
+            end_sec = float(self.entry_end.get())
+        except ValueError:
+            messagebox.showwarning("Invalid Input", "Please enter numeric times.")
+            return
+
+        rate = self._rate
+        duration1 = len(self._samples1) / rate
+        duration2 = len(self._samples2) / rate
+
+        # Use the duration of the longest audio for range checking
+        max_duration = max(len(self._samples1), len(self._samples2)) / rate
+        
+        if not (0 <= start_sec < end_sec <= max_duration): 
+            messagebox.showwarning("Invalid Range", 
+                                  f"Range must be within the longest audio duration ({max_duration:.3f} s).")
+            return
+
+        # Calculate sample indices
+        start_idx = int(start_sec * rate)
+        end_idx = int(end_sec * rate)
+        
+        # Slice the data for both audios
+        y1_zoom = self._samples1[start_idx:end_idx]
+        y2_zoom = self._samples2[start_idx:end_idx]
+        
+        # Create the time axis for the zoomed segment
+        x_zoom = np.linspace(start_sec, end_sec, num=len(y1_zoom))
+        
+        self._plot_dual(y1_zoom, y2_zoom, x_zoom, 
+                        f"Zoomed Overlaid Waveforms ({start_sec:.2f}-{end_sec:.2f}s)")
 
 # Dictionary for the frequncies of musical notes
 music_note_dict = {"C0":16, "C#0":17, "Db0": 17, "D0":18, "D#0":19, "Eb0":19, "E0":21,
