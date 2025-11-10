@@ -17,6 +17,14 @@ AudioViewer Class
    :undoc-members:
    :show-inheritance:
 
+DualAudioViewer Class
+---------------------
+
+.. autoclass:: cs101audio.DualAudioViewer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Functions
 ---------
 

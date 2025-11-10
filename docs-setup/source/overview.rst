@@ -1,8 +1,8 @@
 Overview
 ========
 
-CS101 Audio is a wrapper around the Pydub library designed to make audio
-manipulation simple and intuitive for introductory computer science students.
+CS101 Audio is a wrapper around the simpleaudio Python library designed to make audio
+manipulation simple and intuitive for computer science students.
 
 Features
 --------
