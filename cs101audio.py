@@ -126,6 +126,14 @@ class Audio():
 
         Raises:
             FileNotFoundError: If the specified file does not exist.
+
+        .. code-block:: python
+
+            audio = Audio()
+            audio.open_audio_file("example.wav")
+            audio.play()
+
+            # create and play a new audio object using a file "example.wav"
         """
         
         _check_type(filename, "filename", str)

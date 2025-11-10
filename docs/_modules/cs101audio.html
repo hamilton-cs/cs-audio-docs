@@ -220,6 +220,14 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FileNotFoundError: If the specified file does not exist.</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            audio = Audio()</span>
+<span class="sd">            audio.open_audio_file(&quot;example.wav&quot;)</span>
+<span class="sd">            audio.play()</span>
+
+<span class="sd">            # create and play a new audio object using a file &quot;example.wav&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">_check_type</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
