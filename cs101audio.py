@@ -1,9 +1,11 @@
-# A Pydub based audio library for introductory computer science.
+"""
+A Pydub-based audio library for introductory computer science.
 
-# All files that use the CS101 Audio package must have the following line
-# at the top of the file.
+All files that use the CS101 Audio package must have the following line
+at the top of the file:
 
-# from cs101audio.py import *
+from cs101audio import *
+"""
 
 from pydub import AudioSegment
 from pydub.generators import Sine
@@ -31,8 +33,18 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 MAX_AMPLITUDE = 32767
 MIN_AMPLITUDE = -32768
 
-# For Error Checking
 def _check_type(param, param_name, target_type):
+    """
+    Checks if a parameter is of the correct type and raises a TypeError if not.
+
+    Args:
+        param (any): The parameter to check.
+        param_name (str): The name of the parameter (for the error message).
+        target_type (type): The expected type (e.g., int, str, Audio).
+
+    Raises:
+        TypeError: If 'param' is not an instance of 'target_type'.
+    """
     if not isinstance(param, target_type):
         raise TypeError("\nThe parameter '" + param_name + "' should be a " +
                         str(target_type.__name__) +
@@ -48,58 +60,80 @@ class Audio():
 
     def __init__(self, duration=0, frame_rate=44100):
         """
-        Constructor creates a silent audio segement with default duration of 0 milliseconds
-        
-        Arguments:
-        duration -- the length of the new silent audio segment in milliseconds
-        Default is 0 seconds (empty segment) (int)
-        frame_rate -- the frame_rate of the new audio segment in frames per second.
-        Default is 44100 (int)
+        Initializes a silent audio segment.
+
+        Args:
+            duration (int, optional): The length of the silent audio segment
+                in milliseconds. Defaults to 0.
+            frame_rate (int, optional): The frame rate in frames per second.
+                Defaults to 44100.
         """
         self._audioseg = AudioSegment.silent(duration=duration, frame_rate=frame_rate)
 
 
     def set_audioseg(self, newaudio):
         """
-        Sets the audiosegment attribute of the Audio Object
-        
-        Arguments:
-        newaudio -- new audio segment to replace self's self._audioseg (Audio Object)
+        Sets the internal pydub.AudioSegment object.
+
+        Args:
+            newaudio (pydub.AudioSegment): The new audio segment to replace
+                self._audioseg.
         """
         self._audioseg = newaudio
 
     def get_audioseg(self):
         """
-        Returns the Audio Object's audio segment attribute
+        Gets the internal pydub.AudioSegment object.
+
+        Returns:
+            pydub.AudioSegment: The internal audio segment.
         """
         return self._audioseg
 
     def get_sample_list(self):
         """
-        Returns the a sample list for the Audio Object's audio segment
-        attribute
+        Gets the audio data as a list of samples.
+
+        Returns:
+            list[int]: The list of audio samples.
         """
         return self._audioseg.get_array_of_samples().tolist()
     
     def get_frame_rate(self):
         """
-        Returns the Audio Object's frame rate
+        Gets the frame rate of the audio.
+
+        Returns:
+            int: The frame rate in Hz (frames per second).
         """
         return self._audioseg.frame_rate
 
     def __len__(self):
         """
-        Returns the length of the audio file in milliseconds
+        Gets the length of the audio in milliseconds.
+
+        Returns:
+            int: The duration of the audio in milliseconds.
         """
         return len(self._audioseg)
 
     def open_audio_file(self, filename):
         """
-        Reads filename and sets the Audio object's audio segment to be
-        the one read from the file
-        
-        Arguments:
-        filename -- A string containing the name of the audio file to be opened (str)
+        Opens an audio file and loads it into this Audio object.
+
+        Args:
+            filename (str): The path to the audio file to open.
+
+        Raises:
+            FileNotFoundError: If the specified file does not exist.
+
+        .. code-block:: python
+
+            audio = Audio()
+            audio.open_audio_file("example.wav")
+            audio.play()
+
+            # create and play a new audio object using a file "example.wav"
         """
         
         _check_type(filename, "filename", str)
@@ -113,10 +147,12 @@ class Audio():
         
     def save_to_file(self, filename):
         """
-        Saves this Audio Object's audio segment to filename
-        
-        Arguments:
-        filename -- A string containing the name of the file to save to (str)
+        Saves the audio to a file.
+
+        The file format is determined by the file extension (e.g., ".wav", ".mp3").
+
+        Args:
+            filename (str): The name of the file to save to.
         """
         extendindex = filename.find(".")
         file_extension = filename[extendindex + 1:]
@@ -126,14 +162,16 @@ class Audio():
 
     def from_sample_list(self, sample_lst, template=None):
         """
-        Sets the Audio Object's audio segment to be the one created
-        from the sample_lst parameter using the metadata (sample width, frame rate
-        frame width, etc.) of the template parameter. If template is not passed, self's
-        metadata is used.
-        
-        Arguments:
-        sample_lst -- the list of samples provided to generate the audio (list)
-        template -- an audio object that is used as a template for the new audio segment (Audio Object)
+        Loads audio data from a list of samples.
+
+        This method uses metadata (like frame rate, sample width) from a
+        template Audio object. If no template is provided, it uses its own
+        current metadata.
+
+        Args:
+            sample_lst (list[int]): The list of samples to generate the audio from.
+            template (Audio, optional): An Audio object to use as a template
+                for metadata. Defaults to self.
         """
         if isinstance(sample_lst, list):
             sample_lst = array.array('h', sample_lst)
@@ -152,14 +190,18 @@ class Audio():
 
     def from_generator(self, freq, duration, wavetype):
         """
-        Sets the Audio Object's audio segment to be the audio generated
-        by a wave generator.
-        
-        Arguments
-        freq -- the frequency of the wave to be generated (in Hz) (int)
-        duration -- the duration of the wave to be generated (in milliseconds) (int)
-        wavetype -- the type of wave to be generated. A string containing either
-                    Sine, Square, Sawtooth, or Triangle (case insenstivie) (str)
+        Generates a wave and loads it into this Audio object.
+
+        Args:
+            freq (int): The frequency of the wave to be generated (in Hz).
+            duration (int): The duration of the wave (in milliseconds).
+            wavetype (str): The type of wave ("Sine", "Square", "Sawtooth",
+                or "Triangle"). Case-insensitive.
+
+        Raises:
+            ValueError: If an invalid 'wavetype' is provided.
+            TypeError: If 'freq' or 'duration' are not ints, or 'wavetype'
+                is not a str.
         """
         _check_type(wavetype, "wavetype", str)
         _check_type(freq, "freq", int)
@@ -181,7 +223,7 @@ class Audio():
 
     def play(self):
         """
-        Plays the Audio Object's audio segment, if it isn't empty.
+        Plays the current audio segment, if it isn't empty.
         """
         if len(self._audioseg) > 0:
             play(self._audioseg)
@@ -189,12 +231,15 @@ class Audio():
 
     def __add__(self, other_audio):
         """
-        Implements the + operator to concatenate self's
-        audio segment and other_audio's audio segment.
-        Returns a new Audio Object (self and other_audio are not modified)
-        
-        Arguments:
-        other_audio -- the audio object to concatenate to self (Audio Object)
+        Concatenates this audio with another. (Implements the + operator).
+
+        Does not modify the original Audio objects.
+
+        Args:
+            other_audio (Audio): The audio object to append to the end of this one.
+
+        Returns:
+            Audio: A new Audio object containing the concatenated audio.
         """ 
         _check_type(other_audio, "other_audio", Audio)
 
@@ -206,12 +251,15 @@ class Audio():
 
     def __iadd__(self, other_audio):
         """
-        Implements the += operator to concatenate self's audio segment and
-        other_audio's audio segment
-        Does not return a new Audio Object, but modifies self's audio segment attribute
-        
-        Arguments:
-        other_audio -- the audio object to concatenate to self (Audio Object)
+        Concatenates another audio in-place. (Implements the += operator).
+
+        Modifies this Audio object.
+
+        Args:
+            other_audio (Audio): The audio object to append.
+
+        Returns:
+            Audio: self, modified.
         """
         _check_type(other_audio, "other_audio", Audio)
 
@@ -221,11 +269,15 @@ class Audio():
 
     def __mul__(self, loopnum):
         """
-        Implements the * operator to loop self's audio segment loopnum times.
-        Returns a new Audio Object
-        
-        Arguments:
-        loopnum -- the number of times to loop the audio (int)
+        Repeats (loops) the audio segment. (Implements the * operator).
+
+        Does not modify the original Audio object.
+
+        Args:
+            loopnum (int): The number of times to repeat the audio.
+
+        Returns:
+            Audio: A new Audio object containing the looped audio.
         """
         _check_type(loopnum, "loopnum", int)
 
@@ -236,11 +288,15 @@ class Audio():
 
     def __imul__(self, loopnum):
         """
-        Implements the *= operator to loop self's audio segment loopnum times.
-        Modifies self's audioseg attribute
-        
-        Arguments:
-        loopnum -- the number of times to loop the audio (int)
+        Repeats (loops) the audio segment in-place. (Implements the *= operator).
+
+        Modifies this Audio object.
+
+        Args:
+            loopnum (int): The number of times to repeat the audio.
+
+        Returns:
+            Audio: self, modified.
         """
         _check_type(loopnum, "loopnum", int)
 
@@ -249,10 +305,14 @@ class Audio():
 
     def __getitem__(self, millisecond):
         """
-        Implements [] to index and slice audio segments
-        
-        Arguments:
-        millisecond -- either the millisecond to index or a slice object (int or slice)
+        Gets a slice of the audio. (Implements the [] operator).
+
+        Args:
+            millisecond (int or slice): The millisecond to index or a slice
+                object (e.g., `slice(1000, 2000)` for 1s to 2s).
+
+        Returns:
+            Audio: A new Audio object containing the specified slice.
         """
         result = Audio()
         result.set_audioseg(self._audioseg[millisecond])
@@ -262,53 +322,66 @@ class Audio():
 
     def overlay(self, audio2, position=0, loop=False):
         """
-        Overlays audio2 onto self's audio.
-        
-        Arguments
-        audio2 -- The audio object to be overlayed onto self (Audio Object)
-        position -- The millisecond in self's audio at which to overlay audio2 (int)
-        loop -- If true, loops audio2 so that it plays until the end of self's audio (bool)
+        Overlays (mixes) another audio onto this one.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            audio2 (Audio): The audio object to overlay.
+            position (int, optional): The time in milliseconds at which to
+                start the overlay. Defaults to 0.
+            loop (bool, optional): If True, loops 'audio2' to fill the
+                duration of this audio. Defaults to False.
         """
         self._audioseg = self._audioseg.overlay(audio2.get_audioseg(), position=position, loop=loop)
         
     def apply_gain(self, gain):
         """
-        Changes the amplitude (the general loudness) of the audio.
-        Gain is specificed in decibels
-        
-        Arugments:
-        gain -- the amount of gain in decibles (can be negative) (int)
+        Applies a gain (volume change) to the audio.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            gain (int or float): The amount of gain in decibels (dB).
+                Positive values make it louder, negative values make it quieter.
         """
         self._audioseg = self._audioseg.apply_gain(gain)
         
     def fade_in(self, fadetime):
         """
-        Adds a fade at the beginning of the audio, lasting fadetime milliseconds
-        
-        Arguments
-        fadetime -- the length of the fade in milliseconds (int)
+        Applies a fade-in to the beginning of the audio.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            fadetime (int): The duration of the fade-in (in milliseconds).
         """
         _check_type(fadetime, "fadetime", int)
         self._audioseg = self._audioseg.fade_in(fadetime)
         
     def fade_out(self, fadetime):
         """
-        Adds a fade at the end of audio, lasting fadetime milliseconds
-        
-        Arguments
-        fadetime -- the length of the fade in milliseconds (int)
+        Applies a fade-out to the end of the audio.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            fadetime (int): The duration of the fade-out (in milliseconds).
         """
         _check_type(fadetime, "fadetime", int)
         self._audioseg = self._audioseg.fade_out(fadetime)
         
     def fade(self, fadeintime=0, fadeouttime=0):
         """
-        Adds a fade to the beginning and/or end of the audio,
-        lasting fadeintime and fadeouttime, respectively, both in milliseconds.
-           
-        Arguments:
-        fadeintime -- the length of the beginning fade in milliseconds (int)
-        fadeouttime -- the length of the ending fade in milliseconds (int)
+        Applies both a fade-in and a fade-out.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            fadeintime (int, optional): The duration of the fade-in
+                (in milliseconds). Defaults to 0.
+            fadeouttime (int, optional): The duration of the fade-out
+                (in milliseconds). Defaults to 0.
         """
         _check_type(fadeintime, "fadeintime", int)
         _check_type(fadeouttime, "fadeouttime", int)
@@ -317,10 +390,17 @@ class Audio():
 
     def change_speed(self, factor):
         """
-        Changes the speed of the audio by a multiplier of factor.
-        
-        Arguments:
-        factor -- the multiplier for slowing down(< 1) or speeding up(postive) (int/float)
+        Changes the speed of the audio without changing the pitch.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            factor (int or float): The speed multiplier.
+                (e.g., 2.0 is 2x speed, 0.5 is half speed).
+
+        Raises:
+            TypeError: If 'factor' is not an int or float.
+            ValueError: If 'factor' is 0.
         """
         if not (isinstance(factor, int) or isinstance(factor, float)):
             raise TypeError("\nThe parameter '" + factor + "' should be a " +
@@ -337,13 +417,21 @@ class Audio():
 
     def normalize(self, max_amplitude=MAX_AMPLITUDE):
         """
-        Adjusts the amplitude of all samples in the Audio object 
-        so that the largest positive or negative sample (the peak amplitude) 
-        exactly matches the specified max_amplitude (typically 32767 for 16-bit audio).
-        This ensures the sound is as loud as possible without distortion.
+        Normalizes the audio to a specific peak amplitude.
 
-        Arguments:
-        max_amplitude -- The target peak absolute amplitude. Default is 32767. (int)
+        Adjusts the amplitude so the loudest sample (positive or negative)
+        matches 'max_amplitude', scaling all other samples proportionally.
+        This makes the audio as loud as possible without clipping.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            max_amplitude (int, optional): The target peak absolute amplitude.
+                Defaults to MAX_AMPLITUDE (32767).
+
+        Raises:
+            ValueError: If 'max_amplitude' is negative or > MAX_AMPLITUDE.
+            ZeroDivisionError: If the audio is completely silent (all samples are 0).
         """
         if max_amplitude > MAX_AMPLITUDE:
             raise ValueError("Max amplitude cannot exceed 32,767.")
@@ -367,12 +455,31 @@ class Audio():
 
     def reverse(self):
         """
-        Reverses the audio by reversing the sample list.
+        Reverses the audio.
+
+        Modifies this Audio object in-place.
         """
         self.from_sample_list(list(reversed(self.get_sample_list())))
 
     def average_amplitude(self, start_time=0, end_time=None):
-        # CHANGE TO MILLISECONDS???
+        """
+        Calculates the average absolute amplitude over a time range.
+        
+        Note: This method uses seconds, unlike most others which use milliseconds.
+
+        Args:
+            start_time (float, optional): The start time of the range
+                (in seconds). Defaults to 0.
+            end_time (float, optional): The end time of the range
+                (in seconds). Defaults to the end of the audio.
+
+        Returns:
+            float: The average absolute amplitude of the samples in the range.
+
+        Raises:
+            ValueError: If times are negative or 'start_time' >= 'end_time'
+                or times are outside the audio duration.
+        """
         sample_list = self.get_sample_list()
         frame_rate = self.get_frame_rate()
         duration = len(self.get_sample_list()) / frame_rate
@@ -413,9 +520,21 @@ class Audio():
 
     def pitch_at_time(self, time, window=0.05):
         """
-        Estimates the dominant frequency around the given time (in seconds).
+        Estimates the dominant frequency (pitch) at a specific time.
 
-        window: size in seconds of the analysis window (default = 20 miliseconds)
+        Uses an FFT (Fast Fourier Transform) on a small window of audio
+        around the specified time.
+
+        Args:
+            time (float): The time (in seconds) to analyze.
+            window (float, optional): The size of the analysis window
+                (in seconds). Defaults to 0.05 (50 milliseconds).
+
+        Returns:
+            float: The estimated dominant frequency in Hz.
+
+        Raises:
+            ValueError: If 'time' is outside the audio duration.
         """
 
         samples = self._audioseg.get_array_of_samples()
@@ -462,6 +581,18 @@ class Audio():
         return float(freqs[k])
     
     def get_amplitude_at(self, time_s):
+        """
+        Gets the raw sample amplitude at a specific time.
+
+        Args:
+            time_s (float): The time (in seconds) to get the sample from.
+
+        Returns:
+            int: The amplitude of the sample at that time.
+
+        Raises:
+            ValueError: If 'time_s' is outside the audio duration.
+        """
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
         idx = int(time_s * rate)
@@ -470,6 +601,19 @@ class Audio():
         return sample_list[idx]
 
     def set_amplitude_at(self, time_s, value):
+        """
+        Sets the raw sample amplitude at a specific time.
+
+        Modifies this Audio object in-place. The value will be clamped to
+        the valid 16-bit range (MIN_AMPLITUDE to MAX_AMPLITUDE).
+
+        Args:
+            time_s (float): The time (in seconds) of the sample to set.
+            value (int): The new amplitude value to set.
+
+        Raises:
+            ValueError: If 'time_s' is outside the audio duration.
+        """
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
         idx = int(time_s * rate)
@@ -484,13 +628,21 @@ class Audio():
     
     def crescendo(self, start_time=0, end_time=None, final_multiplier=1.5):
         """
-        Gradually increases the volume between start_time and end_time.
-        This modifies the Audio object in place.
+        Applies a crescendo (gradual volume increase) over a time range.
 
-        Arguments:
-        start_time -- The timestamp to begin the crescendo (seconds)
-        end_time -- The timestamp to end the crescendo (seconds)
-        final_multiplier -- How load the end should be relative to start
+        Modifies this Audio object in-place.
+
+        Args:
+            start_time (float, optional): The time (in seconds) to begin
+                the crescendo. Defaults to 0.
+            end_time (float, optional): The time (in seconds) to end
+                the crescendo. Defaults to the end of the audio.
+            final_multiplier (float, optional): The amplitude multiplier to
+                reach at the end of the crescendo. (e.g., 1.5 is 1.5x louder).
+                Defaults to 1.5.
+
+        Raises:
+            ValueError: If times are invalid or out of range.
         """
 
         sample_list = self.get_sample_list()
@@ -527,15 +679,19 @@ class Audio():
 
     def view(self):
         """
-        Creates an AudioViewer object, which creates a Tkinter window
-        with visualization options.
+        Opens a GUI window to visualize this audio (waveform, FFT, etc.).
         """
         AudioViewer(self)
 
     def view_with(self, other):
         """
-        Creates an AudioViewer object, which creates a Tkinter window
-        with visualization options for two audios at once.
+        Opens a GUI window to compare this audio with another.
+
+        Args:
+            other (Audio): The second Audio object to compare against.
+
+        Raises:
+            TypeError: If 'other' is not an Audio object.
         """
         if not isinstance(other, Audio):
             raise TypeError("\nThe parameter '" + "other" + "' should be a " +
@@ -548,23 +704,20 @@ class Audio():
 
 class AudioViewer:
     """
-    GUI class for displaying waveforms from an Audio object
+    GUI class for displaying waveforms from an Audio object.
+    
+    This class opens a Tkinter window with Matplotlib plots for waveform,
+    FFT, and spectrogram visualizations.
     """
     # Matplotlib Subplot Shorthand: (Rows, Columns, Plot Position)
     FULL_PLOT_POSITION = 111 
 
     def __init__(self, audio_obj):
         """
-        Initializes the AudioViewer object and creates the visualization window.
+        Initializes and runs the single Audio visualization GUI.
 
-        This constructor extracts the sample list and frame rate from the provided 
-        Audio object, then builds a Tkinter window with an embedded Matplotlib 
-        canvas for displaying plots.
-        It also initializes all control buttons and starts the Tkinter main loop.
-        
-        Arguments:
-        audio_obj -- the Audio object whose waveform and frequency data will 
-                     be visualized (Audio)
+        Args:
+            audio_obj (Audio): The Audio object to visualize.
         """
         self._audio = audio_obj
         self._sample_list = np.array(self._audio.get_sample_list(), dtype=np.int16)
@@ -632,12 +785,12 @@ class AudioViewer:
 
     def plot(self, y, x, title):
         """
-        Helper function to display data on the existing Matplotlib canvas.
-        
-        Arguments:
-        y -- array-like, amplitude data to plot (list or numpy array)
-        x -- array-like, corresponding time values in seconds (list or numpy array)
-        title -- title of the plot (str)
+        Helper function to draw a plot on the Matplotlib canvas.
+
+        Args:
+            y (array-like): The Y-axis data (amplitude).
+            x (array-like): The X-axis data (time in seconds).
+            title (str): The title for the plot.
         """
         self._ax.clear()
         self.clear_cbar()
@@ -650,10 +803,7 @@ class AudioViewer:
 
     def plot_waveform(self):
         """
-        Displays the complete waveform of the audio signal by plotting the value of each
-        entry in the sample list, in the Tkinter window.
-        X-axis: Time
-        Y-axis: Amplitude
+        Plots the full audio waveform (Amplitude vs. Time).
         """
         duration = len(self._sample_list) / self._rate
         x = np.linspace(0, duration, num=len(self._sample_list))
@@ -661,15 +811,7 @@ class AudioViewer:
 
     def plot_zoom(self):
         """
-        Displays a zoomed-in waveform for a specified time interval, in the Tkinter window.
-
-        The start and end times (in seconds) are entered by the user in the GUI. 
-        The function extracts the corresponding range of samples from the audio 
-        and plots amplitude versus time for that segment, allowing closer visual 
-        inspection of smaller sections of the waveform.
-        
-        X-axis: Time
-        Y-axis: Amplitude
+        Plots a zoomed-in portion of the waveform based on user input times.
         """
         try:
             start = float(self.entry_start.get())
@@ -687,10 +829,7 @@ class AudioViewer:
         
     def plot_fft(self):
         """
-        Creates Fast Fourier Transform (FFT) plot in the Tkinter window.
-
-        X-axis: Frequency (Hz)
-        Y-axis: Magnitude (how much this frequency is present in the audio)
+        Plots the frequency spectrum (FFT) of the entire audio.
         """
         # Compute FFT
         spectrum = np.fft.fft(self._sample_list)
@@ -712,10 +851,12 @@ class AudioViewer:
         
     def plot_spectrogram(self):
         """
-        Creates spectrogram plot, which performs FFT on small windows, in the Tkinter window.
+        Plots a spectrogram (Frequency vs. Time, with amplitude as color).
 
-        X-axis: Time
-        Y-axis: Frequency (Hz)
+        .. figure:: _static/spectrogram_graphic.png
+           :width: 80%
+           :align: left
+           :alt: Example plot of an audio spectrogram
         """
         self._ax.clear()
         self.clear_cbar()
@@ -732,6 +873,7 @@ class AudioViewer:
         """
         Displays the peak (maximum absolute) amplitude of the audio signal
         and the timestamp at which it occurs.
+        
         If the same peak occurs more than once, only the first time is shown.
         """
         # Find index of maximum absolute amplitude
@@ -748,18 +890,20 @@ class AudioViewer:
 
 class DualAudioViewer:
     """
-    GUI class for displaying and comparing two audio waveforms (Audio1 in Blue, 
-    Audio2 in Red) with options for full waveform and zoomed waveform.
+    GUI class for displaying and comparing two audio waveforms.
+
+    Audio 1 is plotted in Blue, Audio 2 is plotted in Red.
+    Provides options for full waveform and zoomed waveform comparison.
     """
     FULL_PLOT_POSITION = 111 
 
     def __init__(self, audio_obj1, audio_obj2):
         """
-        Initializes the DualAudioViewer object for two Audio objects.
+        Initializes and runs the dual Audio comparison GUI.
 
-        Arguments:
-        audio_obj1 -- The first Audio object (plotted in blue)
-        audio_obj2 -- The second Audio object (plotted in red)
+        Args:
+            audio_obj1 (Audio): The first Audio object (plotted in blue).
+            audio_obj2 (Audio): The second Audio object (plotted in red).
         """
         # --- Data Extraction and Validation ---
         
@@ -819,7 +963,13 @@ class DualAudioViewer:
 
     def _plot_dual(self, y1, y2, x, title):
         """
-        Helper function to display two datasets on the existing Matplotlib canvas.
+        Helper function to draw two overlaid plots on the Matplotlib canvas.
+
+        Args:
+            y1 (array-like): The Y-axis data for the first audio (blue).
+            y2 (array-like): The Y-axis data for the second audio (red).
+            x (array-like): The common X-axis data (time in seconds).
+            title (str): The title for the plot.
         """
         self._ax.clear()
         
@@ -841,6 +991,11 @@ class DualAudioViewer:
     def plot_waveform(self):
         """
         Displays the complete, overlaid waveform of both audio signals.
+
+        .. figure:: _static/dual_waveform_graphic.png
+           :width: 80%
+           :align: left
+           :alt: Example plot of an audio waveform
         """
         rate = self._rate
         
@@ -911,20 +1066,29 @@ music_note_dict = {"C0":16, "C#0":17, "Db0": 17, "D0":18, "D#0":19, "Eb0":19, "E
                    "B7":3951, "C8":4186, "C#8":4435, "Db8":4435, "D8":4699, "D#8":4978, "Eb8":4978,
                    "E8":5274, "F8":5588, "F#8":5920, "Gb8":5920, "G8":6272, "G#8":6645, "Ab8":6645,
                    "A8":7040, "A#8":7459, "B8":7902}
+"""A dictionary mapping musical note names (e.g., "A4") to frequencies (in Hz)."""
 
 
 
 def generate_music_note(note, duration, wavetype, gain=0): #MAKE THIS ANOTHER CONSTRUCTOR?? ASK CLIENT
     """
-    Function generates a musical note of duration milliseconds, with wavetype type.
-    Returns a new audio object with the generated audio
-    
-    Arguments:
-    note -- A string denoting a musical note of the form [A-G](#|b|)[0-8]. Case insenstive. (str)
-    duration -- Duration of the note in milliseconds. (int)
-    wavetype -- A string denoting the type of wave to generate. Must be either Sine, Square
-                Sawtooth or Triangle. Case insensitive. (str)
-    gain -- Gain to apply to note (can be negative) (int)
+    Generates a single musical note as a new Audio object.
+
+    Args:
+        note (str): The note to generate (e.g., "A4", "C#5", "Eb3").
+            Case-insensitive.
+        duration (int): The duration of the note in milliseconds.
+        wavetype (str): The type of wave ("Sine", "Square", "Sawtooth",
+            or "Triangle"). Case-insensitive.
+        gain (int or float, optional): Gain to apply in decibels (dB).
+            Defaults to 0.
+
+    Returns:
+        Audio: A new Audio object containing the note.
+
+    Raises:
+        ValueError: If the 'note' or 'wavetype' is invalid.
+        TypeError: If parameters are not of the correct type.
     """
     _check_type(note, "note", str)
     _check_type(duration, "duration", int)
