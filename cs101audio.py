@@ -464,14 +464,12 @@ class Audio():
     def average_amplitude(self, start_time=0, end_time=None):
         """
         Calculates the average absolute amplitude over a time range.
-        
-        Note: This method uses seconds, unlike most others which use milliseconds.
 
         Args:
             start_time (float, optional): The start time of the range
-                (in seconds). Defaults to 0.
+                (in miliseconds). Defaults to 0.
             end_time (float, optional): The end time of the range
-                (in seconds). Defaults to the end of the audio.
+                (in miliseconds). Defaults to the end of the audio.
 
         Returns:
             float: The average absolute amplitude of the samples in the range.
@@ -481,9 +479,8 @@ class Audio():
                 or times are outside the audio duration.
         """
         sample_list = self.get_sample_list()
-        frame_rate = self.get_frame_rate()
-        duration = len(self.get_sample_list()) / frame_rate
-        print(duration)
+        rate = self.get_frame_rate()
+        duration = len(sample_list) * 1000 / rate
         
         # Default to full length if end_time not given
         if end_time is None:
@@ -500,8 +497,8 @@ class Audio():
           raise ValueError(f"end_time ({end_time:.2f}s) exceeds audio length ({duration:.2f}s).")
 
         # Convert times to sample indices
-        start_idx = int(start_time * frame_rate)
-        end_idx = int(end_time * frame_rate)
+        start_idx = int(start_time * rate / 1000)
+        end_idx = int(end_time * rate / 1000)
 
         # Value verification
         start_idx = max(0, start_idx)
@@ -515,10 +512,8 @@ class Audio():
         avg_amp = sum(abs(x) for x in segment) / len(segment) if segment else 0.0
 
         return avg_amp
-    
-    import numpy as np
 
-    def pitch_at_time(self, time, window=0.05):
+    def pitch_at_time(self, time, window=50):
         """
         Estimates the dominant frequency (pitch) at a specific time.
 
@@ -526,9 +521,9 @@ class Audio():
         around the specified time.
 
         Args:
-            time (float): The time (in seconds) to analyze.
+            time (float): The time (in miliseconds) to analyze.
             window (float, optional): The size of the analysis window
-                (in seconds). Defaults to 0.05 (50 milliseconds).
+                (in miliseconds). Defaults to 50 milliseconds
 
         Returns:
             float: The estimated dominant frequency in Hz.
@@ -536,25 +531,31 @@ class Audio():
         Raises:
             ValueError: If 'time' is outside the audio duration.
         """
-
-        samples = self._audioseg.get_array_of_samples()
         rate = self.get_frame_rate()
-        duration = len(samples) / rate
+        samples = self._audioseg.get_array_of_samples()
+        duration_ms = len(samples) * 1000 / rate
+        
+        # Convert ms inputs to seconds
+        time_s = time / 1000.0
+        window_s = window / 1000.0
+        duration_s = duration_ms / 1000.0
 
-        if time < 0 or time > duration:
-            raise ValueError("time t must be within audio duration")
+        if time_s < 0 or time_s > duration_s:
+            raise ValueError(f"Timestamp ({time}ms) must be within audio duration ({duration_ms:.0f}ms)")
 
-        start_time = time - (window/2)
-        end_time   = time + (window/2)
+        # Define segment boundaries in seconds
+        start_time_s = time_s - (window_s / 2)
+        end_time_s = time_s + (window_s / 2)
 
-        # Make sure start and end time are within the audio's duration
-        if start_time < 0: 
-            start_time = 0
-        if end_time > duration: 
-            end_time = duration
+        # Make sure start and end time are within the audio's duration (in seconds)
+        if start_time_s < 0: 
+            start_time_s = 0
+        if end_time_s > duration_s: 
+            end_time_s = duration_s
 
-        start_idx = int(start_time * rate)
-        end_idx   = int(end_time * rate)
+        # Convert seconds to sample indices
+        start_idx = int(start_time_s * rate)
+        end_idx = int(end_time_s * rate)
 
         segment = np.array(samples[start_idx:end_idx], dtype=np.float32)
 
@@ -580,27 +581,31 @@ class Audio():
         k = np.argmax(magnitudes)
         return float(freqs[k])
     
-    def get_amplitude_at(self, time_s):
+    def get_amplitude_at(self, time):
         """
         Gets the raw sample amplitude at a specific time.
 
         Args:
-            time_s (float): The time (in seconds) to get the sample from.
+            time (float): The time (in miliseconds) to get the sample from.
 
         Returns:
             int: The amplitude of the sample at that time.
 
         Raises:
-            ValueError: If 'time_s' is outside the audio duration.
+            ValueError: If 'time' is outside the audio duration.
         """
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
-        idx = int(time_s * rate)
+        idx = int(time * rate / 1000)
+        
         if idx < 0 or idx >= len(sample_list):
-            raise ValueError("Timestamp outside audio duration")
+            # Calculate duration in ms for the error message
+            duration_ms = len(sample_list) * 1000 / rate
+            raise ValueError(f"Timestamp ({time}ms) outside audio duration ({duration_ms:.0f}ms)")
+        
         return sample_list[idx]
 
-    def set_amplitude_at(self, time_s, value):
+    def set_amplitude_at(self, time, value):
         """
         Sets the raw sample amplitude at a specific time.
 
@@ -608,20 +613,23 @@ class Audio():
         the valid 16-bit range (MIN_AMPLITUDE to MAX_AMPLITUDE).
 
         Args:
-            time_s (float): The time (in seconds) of the sample to set.
+            time (float): The time (in miliseconds) of the sample to set.
             value (int): The new amplitude value to set.
 
         Raises:
-            ValueError: If 'time_s' is outside the audio duration.
+            ValueError: If 'time' is outside the audio duration.
         """
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
-        idx = int(time_s * rate)
+        idx = int(time * rate / 1000)
+        
         if idx < 0 or idx >= len(sample_list):
-            raise ValueError("Timestamp outside audio duration")
+            # Calculate duration in ms for the error message
+            duration_ms = len(sample_list) * 1000 / rate
+            raise ValueError(f"Timestamp ({time}ms) outside audio duration ({duration_ms:.0f}ms)")
 
-        # clamp to legal sample range
-        value = max(min(value, MAX_AMPLITUDE), -MAX_AMPLITUDE)
+        # Clamp to legal sample range
+        value = max(min(value, MAX_AMPLITUDE), MIN_AMPLITUDE)
 
         sample_list[idx] = value
         self.from_sample_list(sample_list)
@@ -633,9 +641,9 @@ class Audio():
         Modifies this Audio object in-place.
 
         Args:
-            start_time (float, optional): The time (in seconds) to begin
+            start_time (float, optional): The time (in miliseconds) to begin
                 the crescendo. Defaults to 0.
-            end_time (float, optional): The time (in seconds) to end
+            end_time (float, optional): The time (in miliseconds) to end
                 the crescendo. Defaults to the end of the audio.
             final_multiplier (float, optional): The amplitude multiplier to
                 reach at the end of the crescendo. (e.g., 1.5 is 1.5x louder).
@@ -646,29 +654,87 @@ class Audio():
         """
 
         sample_list = self.get_sample_list()
-        rate = self.get_frame_rate()
-        duration = len(sample_list) / rate
+        rate = self.get_frame_rate() 
+        
+        # Calculate total duration in ms
+        duration_ms = len(sample_list) * 1000 / rate 
 
         if end_time is None:
-            end_time = duration
+            end_time = duration_ms
 
-        # Safety checks
+        # Validation in ms
         if start_time < 0 or end_time < 0:
             raise ValueError("Times must be non-negative.")
-        if not (0 <= start_time < end_time <= duration):
-            raise ValueError("Invalid time range for crescendo.")
+        if not (0 <= start_time < end_time <= duration_ms):
+            raise ValueError(f"Invalid time range for crescendo: {start_time}ms to {end_time}ms. Duration is {duration_ms:.0f}ms.")
 
-        start_idx = int(start_time * rate)
-        end_idx   = int(end_time   * rate)
+        start_idx = int(start_time * rate / 1000)
+        end_idx   = int(end_time   * rate / 1000)
 
         length = end_idx - start_idx
         if length <= 0:
-            return  # nothing to do
+            return
 
         # Linearly ramp from 1.0 to final_multiplier
         for i in range(length):
-            progress = i / (length - 1)  # 0.0 → 1.0 across crescendo
+            # progress goes from 0.0 to 1.0 across crescendo segment
+            progress = i / (length - 1) 
             multiplier = 1.0 + progress * (final_multiplier - 1.0)
+            new_val = int(sample_list[start_idx + i] * multiplier)
+
+            # Clamp to safe 16-bit range
+            new_val = max(min(new_val, MAX_AMPLITUDE), MIN_AMPLITUDE)
+            sample_list[start_idx + i] = new_val
+
+        self.from_sample_list(sample_list)
+
+    def decrescendo(self, start_time=0, end_time=None, initial_multiplier=1.5):
+        """
+        Applies a decrescendo (gradual volume decrease) over a time range.
+
+        Modifies this Audio object in-place.
+
+        Args:
+            start_time (float, optional): The time (in miliseconds) to begin
+                the decrescendo. Defaults to 0.
+            end_time (float, optional): The time (in miliseconds) to end
+                the decrescendo. Defaults to the end of the audio.
+            initial_multiplier (float, optional): How loud the start should 
+                be (e.g., 1.5 for 50% louder)
+
+        Raises:
+            ValueError: If times are invalid or out of range.
+        """
+        sample_list = self.get_sample_list()
+        rate = self.get_frame_rate() 
+        
+        # Calculate total duration in ms
+        duration_ms = len(sample_list) * 1000 / rate 
+
+        if end_time is None:
+            end_time = duration_ms
+
+        # Validation in ms 
+        if start_time < 0 or end_time < 0:
+            raise ValueError("Times must be non-negative.")
+        if initial_multiplier < 0.0:
+            raise ValueError("Initial multiplier must be non-negative.")
+        if not (0 <= start_time < end_time <= duration_ms):
+            raise ValueError(f"Invalid time range for decrescendo: {start_time}ms to {end_time}ms. Duration is {duration_ms:.0f}ms.")
+
+        start_idx = int(start_time * rate / 1000)
+        end_idx   = int(end_time   * rate / 1000)
+
+        length = end_idx - start_idx
+        if length <= 0:
+            return
+
+        # Linearly ramp from initial_multiplier down to 1.0
+        for i in range(length):
+            # progress goes from 0.0 -> 1.0 across decrescendo segment
+            progress = i / (length - 1) 
+            multiplier = initial_multiplier - progress * (initial_multiplier - 1.0)
+            
             new_val = int(sample_list[start_idx + i] * multiplier)
 
             # Clamp to safe 16-bit range
