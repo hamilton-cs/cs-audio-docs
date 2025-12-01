@@ -30,9 +30,6 @@ from tkinter import messagebox
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-MAX_AMPLITUDE = 32767
-MIN_AMPLITUDE = -32768
-
 def _check_type(param, param_name, target_type):
     """
     Checks if a parameter is of the correct type and raises a TypeError if not.
@@ -57,6 +54,10 @@ class Audio():
     """
     Wrapper Class for the Pydub AudioSegment Class
     """
+
+    # 16-bit PCM amplitude limits as class-level attributes
+    MAX_AMPLITUDE = 32767
+    MIN_AMPLITUDE = -32768
 
     def __init__(self, duration=0, frame_rate=44100):
         """
@@ -433,7 +434,7 @@ class Audio():
             ValueError: If 'max_amplitude' is negative or > MAX_AMPLITUDE.
             ZeroDivisionError: If the audio is completely silent (all samples are 0).
         """
-        if max_amplitude > MAX_AMPLITUDE:
+        if max_amplitude > Audio.MAX_AMPLITUDE:
             raise ValueError("Max amplitude cannot exceed 32,767.")
         elif max_amplitude < 0:
             raise ValueError("Max amplitude must be positive.")
@@ -492,9 +493,9 @@ class Audio():
         elif start_time >= end_time:
            raise ValueError("start_time must be less than end_time.")
         elif start_time > duration:
-           raise ValueError(f"start_time ({start_time:.2f}s) exceeds audio length ({duration:.2f}s).")
+           raise ValueError(f"start_time ({start_time:.2f}s) exceeds duration ({duration:.2f}s).")
         elif end_time > duration:
-          raise ValueError(f"end_time ({end_time:.2f}s) exceeds audio length ({duration:.2f}s).")
+          raise ValueError(f"end_time ({end_time:.2f}s) exceeds duration ({duration:.2f}s).")
 
         # Convert times to sample indices
         start_idx = int(start_time * rate / 1000)
@@ -629,7 +630,7 @@ class Audio():
             raise ValueError(f"Timestamp ({time}ms) outside audio duration ({duration_ms:.0f}ms)")
 
         # Clamp to legal sample range
-        value = max(min(value, MAX_AMPLITUDE), MIN_AMPLITUDE)
+        value = max(min(value, Audio.MAX_AMPLITUDE), Audio.MIN_AMPLITUDE)
 
         sample_list[idx] = value
         self.from_sample_list(sample_list)
@@ -683,7 +684,7 @@ class Audio():
             new_val = int(sample_list[start_idx + i] * multiplier)
 
             # Clamp to safe 16-bit range
-            new_val = max(min(new_val, MAX_AMPLITUDE), MIN_AMPLITUDE)
+            new_val = max(min(new_val, Audio.MAX_AMPLITUDE), Audio.MIN_AMPLITUDE)
             sample_list[start_idx + i] = new_val
 
         self.from_sample_list(sample_list)
@@ -738,7 +739,7 @@ class Audio():
             new_val = int(sample_list[start_idx + i] * multiplier)
 
             # Clamp to safe 16-bit range
-            new_val = max(min(new_val, MAX_AMPLITUDE), MIN_AMPLITUDE)
+            new_val = max(min(new_val, Audio.MAX_AMPLITUDE), Audio.MIN_AMPLITUDE)
             sample_list[start_idx + i] = new_val
 
         self.from_sample_list(sample_list)
