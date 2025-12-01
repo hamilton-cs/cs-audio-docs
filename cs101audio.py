@@ -19,10 +19,6 @@ import warnings # For ignoring a PyDub warning that runs everytime you run your 
 warnings.filterwarnings("ignore", message="Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work")
 warnings.filterwarnings("ignore", message="Couldn't find ffplay or avplay - defaulting to ffplay, but may not work")
 
-from pydub import * # For the Base AudioSegment Class
-from pydub.playback import * # For playing back audio
-from pydub.generators import * # For generating audio waves
-
 # Imports for GUI plots
 import numpy as np
 import tkinter as tk
@@ -935,7 +931,7 @@ class AudioViewer:
         """
         Removes the color bar created by the spectrogram if it exists.
         """
-        # Check if the _cbar attribute was exists AND is not None
+        # Check if the _cbar attribute exists AND is not None
         if hasattr(self, '_cbar') and self._cbar is not None:
             # Recreate the Axes: This is the critical step.
             self._ax = self._fig.add_subplot(AudioViewer.FULL_PLOT_POSITION)
