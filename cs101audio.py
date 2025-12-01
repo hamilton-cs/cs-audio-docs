@@ -37,14 +37,18 @@ def _check_type(param, param_name, target_type):
     Args:
         param (any): The parameter to check.
         param_name (str): The name of the parameter (for the error message).
-        target_type (type): The expected type (e.g., int, str, Audio).
+        target_type (type or tuple): The expected type(s) (e.g., int, str, Audio, or (int, float)).
 
     Raises:
         TypeError: If 'param' is not an instance of 'target_type'.
     """
     if not isinstance(param, target_type):
+        if isinstance(target_type, tuple):
+            type_names = " or ".join([t.__name__ for t in target_type])
+        else:
+            type_names = target_type.__name__
         raise TypeError("\nThe parameter '" + param_name + "' should be a " +
-                        str(target_type.__name__) +
+                        type_names +
                         " but instead was a " +
                         str(type(param).__name__) + "\n" +
                         param_name + " = " + str(param))
@@ -69,6 +73,8 @@ class Audio():
             frame_rate (int, optional): The frame rate in frames per second.
                 Defaults to 44100.
         """
+        _check_type(duration, "duration", int)
+        _check_type(frame_rate, "frame_rate", int)
         self._audioseg = AudioSegment.silent(duration=duration, frame_rate=frame_rate)
 
 
@@ -155,6 +161,7 @@ class Audio():
         Args:
             filename (str): The name of the file to save to.
         """
+        _check_type(filename, "filename", str)
         extendindex = filename.find(".")
         file_extension = filename[extendindex + 1:]
       
@@ -174,6 +181,9 @@ class Audio():
             template (Audio, optional): An Audio object to use as a template
                 for metadata. Defaults to self.
         """
+        _check_type(sample_lst, "sample_lst", list)
+        if template is not None:
+            _check_type(template, "template", Audio)
         if isinstance(sample_lst, list):
             sample_lst = array.array('h', sample_lst)
             
@@ -334,6 +344,9 @@ class Audio():
             loop (bool, optional): If True, loops 'audio2' to fill the
                 duration of this audio. Defaults to False.
         """
+        _check_type(audio2, "audio2", Audio)
+        _check_type(position, "position", int)
+        _check_type(loop, "loop", bool)
         self._audioseg = self._audioseg.overlay(audio2.get_audioseg(), position=position, loop=loop)
         
     def apply_gain(self, gain):
@@ -346,6 +359,7 @@ class Audio():
             gain (int or float): The amount of gain in decibels (dB).
                 Positive values make it louder, negative values make it quieter.
         """
+        _check_type(gain, "gain", (int, float))
         self._audioseg = self._audioseg.apply_gain(gain)
         
     def fade_in(self, fadetime):
@@ -434,10 +448,11 @@ class Audio():
             ValueError: If 'max_amplitude' is negative or > MAX_AMPLITUDE.
             ZeroDivisionError: If the audio is completely silent (all samples are 0).
         """
+        _check_type(max_amplitude, "max_amplitude", int)
         if max_amplitude > Audio.MAX_AMPLITUDE:
-            raise ValueError("Max amplitude cannot exceed 32,767.")
+            raise ValueError(f"Max amplitude cannot exceed 32,767. Got {max_amplitude}.")
         elif max_amplitude < 0:
-            raise ValueError("Max amplitude must be positive.")
+            raise ValueError(f"Max amplitude must be positive. Got {max_amplitude}.")
         
         sample_list = self._audioseg.get_array_of_samples().tolist()
         largest = max(sample_list)
@@ -479,6 +494,9 @@ class Audio():
             ValueError: If times are negative or 'start_time' >= 'end_time'
                 or times are outside the audio duration.
         """
+        _check_type(start_time, "start_time", (int, float))
+        if end_time is not None:
+            _check_type(end_time, "end_time", (int, float))
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
         duration = len(sample_list) * 1000 / rate
@@ -489,13 +507,16 @@ class Audio():
 
         # Verify valid start and end times
         if start_time < 0 or end_time < 0:
-            raise ValueError("Start and end times must be non-negative.")
-        elif start_time >= end_time:
-           raise ValueError("start_time must be less than end_time.")
-        elif start_time > duration:
-           raise ValueError(f"start_time ({start_time:.2f}s) exceeds duration ({duration:.2f}s).")
-        elif end_time > duration:
-          raise ValueError(f"end_time ({end_time:.2f}s) exceeds duration ({duration:.2f}s).")
+            raise ValueError(f"Start and end times must be non-negative. Got start_time={start_time:.2f}s, end_time={end_time:.2f}s.")
+        if start_time > duration or end_time > duration:
+            if start_time > duration and end_time > duration:
+                raise ValueError(f"Both start_time and end_time exceed the audio duration. Got start_time={start_time:.2f}s, end_time={end_time:.2f}s, but duration is {duration:.2f}s.")
+            elif start_time > duration:
+                raise ValueError(f"start_time exceeds the audio duration. Got start_time={start_time:.2f}s, but duration is {duration:.2f}s.")
+            else:
+                raise ValueError(f"end_time exceeds the audio duration. Got end_time={end_time:.2f}s, but duration is {duration:.2f}s.")
+        if start_time >= end_time:
+            raise ValueError(f"start_time must be less than end_time. Got start_time={start_time:.2f}s, end_time={end_time:.2f}s.")
 
         # Convert times to sample indices
         start_idx = int(start_time * rate / 1000)
@@ -532,6 +553,8 @@ class Audio():
         Raises:
             ValueError: If 'time' is outside the audio duration.
         """
+        _check_type(time, "time", (int, float))
+        _check_type(window, "window", (int, float))
         rate = self.get_frame_rate()
         samples = self._audioseg.get_array_of_samples()
         duration_ms = len(samples) * 1000 / rate
@@ -541,8 +564,10 @@ class Audio():
         window_s = window / 1000.0
         duration_s = duration_ms / 1000.0
 
-        if time_s < 0 or time_s > duration_s:
-            raise ValueError(f"Timestamp ({time}ms) must be within audio duration ({duration_ms:.0f}ms)")
+        if time_s < 0:
+            raise ValueError(f"Timestamp must be non-negative. Got {time}ms.")
+        if time_s > duration_s:
+            raise ValueError(f"Timestamp exceeds audio duration. Got {time}ms, but duration is {duration_ms:.0f}ms.")
 
         # Define segment boundaries in seconds
         start_time_s = time_s - (window_s / 2)
@@ -595,14 +620,16 @@ class Audio():
         Raises:
             ValueError: If 'time' is outside the audio duration.
         """
+        _check_type(time, "time", (int, float))
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
+        duration_ms = len(sample_list) * 1000 / rate
         idx = int(time * rate / 1000)
         
-        if idx < 0 or idx >= len(sample_list):
-            # Calculate duration in ms for the error message
-            duration_ms = len(sample_list) * 1000 / rate
-            raise ValueError(f"Timestamp ({time}ms) outside audio duration ({duration_ms:.0f}ms)")
+        if idx < 0:
+            raise ValueError(f"Timestamp must be non-negative. Got {time}ms.")
+        if idx >= len(sample_list):
+            raise ValueError(f"Timestamp exceeds audio duration. Got {time}ms, but duration is {duration_ms:.0f}ms.")
         
         return sample_list[idx]
 
@@ -620,14 +647,17 @@ class Audio():
         Raises:
             ValueError: If 'time' is outside the audio duration.
         """
+        _check_type(time, "time", (int, float))
+        _check_type(value, "value", int)
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate()
+        duration_ms = len(sample_list) * 1000 / rate
         idx = int(time * rate / 1000)
         
-        if idx < 0 or idx >= len(sample_list):
-            # Calculate duration in ms for the error message
-            duration_ms = len(sample_list) * 1000 / rate
-            raise ValueError(f"Timestamp ({time}ms) outside audio duration ({duration_ms:.0f}ms)")
+        if idx < 0:
+            raise ValueError(f"Timestamp must be non-negative. Got {time}ms.")
+        if idx >= len(sample_list):
+            raise ValueError(f"Timestamp exceeds audio duration. Got {time}ms, but duration is {duration_ms:.0f}ms.")
 
         # Clamp to legal sample range
         value = max(min(value, Audio.MAX_AMPLITUDE), Audio.MIN_AMPLITUDE)
@@ -653,7 +683,10 @@ class Audio():
         Raises:
             ValueError: If times are invalid or out of range.
         """
-
+        _check_type(start_time, "start_time", (int, float))
+        if end_time is not None:
+            _check_type(end_time, "end_time", (int, float))
+        _check_type(final_multiplier, "final_multiplier", (int, float))
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate() 
         
@@ -665,9 +698,18 @@ class Audio():
 
         # Validation in ms
         if start_time < 0 or end_time < 0:
-            raise ValueError("Times must be non-negative.")
-        if not (0 <= start_time < end_time <= duration_ms):
-            raise ValueError(f"Invalid time range for crescendo: {start_time}ms to {end_time}ms. Duration is {duration_ms:.0f}ms.")
+            raise ValueError(f"Start and end times must be non-negative. Got start_time={start_time}ms, end_time={end_time}ms.")
+        if start_time > duration_ms or end_time > duration_ms:
+            if start_time > duration_ms and end_time > duration_ms:
+                raise ValueError(f"Both start_time and end_time exceed the audio duration. Got start_time={start_time}ms, end_time={end_time}ms, but duration is {duration_ms:.0f}ms.")
+            elif start_time > duration_ms:
+                raise ValueError(f"start_time exceeds the audio duration. Got start_time={start_time}ms, but duration is {duration_ms:.0f}ms.")
+            else:
+                raise ValueError(f"end_time exceeds the audio duration. Got end_time={end_time}ms, but duration is {duration_ms:.0f}ms.")
+        if start_time >= end_time:
+            raise ValueError(f"start_time must be less than end_time. Got start_time={start_time}ms, end_time={end_time}ms.")
+        if final_multiplier < 0.0:
+            raise ValueError(f"Final multiplier must be non-negative. Got {final_multiplier}.")
 
         start_idx = int(start_time * rate / 1000)
         end_idx   = int(end_time   * rate / 1000)
@@ -706,6 +748,10 @@ class Audio():
         Raises:
             ValueError: If times are invalid or out of range.
         """
+        _check_type(start_time, "start_time", (int, float))
+        if end_time is not None:
+            _check_type(end_time, "end_time", (int, float))
+        _check_type(initial_multiplier, "initial_multiplier", (int, float))
         sample_list = self.get_sample_list()
         rate = self.get_frame_rate() 
         
@@ -717,11 +763,18 @@ class Audio():
 
         # Validation in ms 
         if start_time < 0 or end_time < 0:
-            raise ValueError("Times must be non-negative.")
+            raise ValueError(f"Start and end times must be non-negative. Got start_time={start_time}ms, end_time={end_time}ms.")
+        if start_time > duration_ms or end_time > duration_ms:
+            if start_time > duration_ms and end_time > duration_ms:
+                raise ValueError(f"Both start_time and end_time exceed the audio duration. Got start_time={start_time}ms, end_time={end_time}ms, but duration is {duration_ms:.0f}ms.")
+            elif start_time > duration_ms:
+                raise ValueError(f"start_time exceeds the audio duration. Got start_time={start_time}ms, but duration is {duration_ms:.0f}ms.")
+            else:
+                raise ValueError(f"end_time exceeds the audio duration. Got end_time={end_time}ms, but duration is {duration_ms:.0f}ms.")
+        if start_time >= end_time:
+            raise ValueError(f"start_time must be less than end_time. Got start_time={start_time}ms, end_time={end_time}ms.")
         if initial_multiplier < 0.0:
-            raise ValueError("Initial multiplier must be non-negative.")
-        if not (0 <= start_time < end_time <= duration_ms):
-            raise ValueError(f"Invalid time range for decrescendo: {start_time}ms to {end_time}ms. Duration is {duration_ms:.0f}ms.")
+            raise ValueError(f"Initial multiplier must be non-negative. Got {initial_multiplier}.")
 
         start_idx = int(start_time * rate / 1000)
         end_idx   = int(end_time   * rate / 1000)
@@ -767,39 +820,65 @@ class Audio():
                             str(type(other).__name__) + "\n" +
                             "other" + " = " + str(other))
 
-        DualAudioViewer(self, other)
+        AudioViewer(self, other)
 
 class AudioViewer:
     """
-    GUI class for displaying waveforms from an Audio object.
+    GUI class for displaying waveforms from Audio object(s).
     
     This class opens a Tkinter window with Matplotlib plots for waveform,
-    FFT, and spectrogram visualizations.
+    FFT, and spectrogram visualizations. Supports both single audio visualization
+    and dual audio comparison modes.
     """
     # Matplotlib Subplot Shorthand: (Rows, Columns, Plot Position)
     FULL_PLOT_POSITION = 111 
 
-    def __init__(self, audio_obj):
+    def __init__(self, audio_obj, audio_obj2=None):
         """
-        Initializes and runs the single Audio visualization GUI.
+        Initializes and runs the Audio visualization GUI.
 
         Args:
             audio_obj (Audio): The Audio object to visualize.
+            audio_obj2 (Audio, optional): Optional second Audio object for comparison.
+                If provided, operates in dual/comparison mode.
         """
-        self._audio = audio_obj
-        self._sample_list = np.array(self._audio.get_sample_list(), dtype=np.int16)
-        self._rate = self._audio.get_frame_rate()
-        if len(self._sample_list) == 0:
-            messagebox.showwarning("No Data", "No samples to display.")
-            return
+        # Determine mode
+        self._dual_mode = audio_obj2 is not None
+        
+        if self._dual_mode:
+            # Dual mode: two audio objects
+            self._samples1 = np.array(audio_obj.get_sample_list(), dtype=np.int16)
+            self._rate = audio_obj.get_frame_rate()
+            self._name1 = getattr(audio_obj, 'name', 'Audio 1 (Blue)')
+            
+            self._samples2 = np.array(audio_obj2.get_sample_list(), dtype=np.int16)
+            self._name2 = getattr(audio_obj2, 'name', 'Audio 2 (Red)')
+            
+            # Basic Check
+            if len(self._samples1) == 0 or len(self._samples2) == 0:
+                messagebox.showwarning("No Data", "One or both audio segments are empty.")
+                return
+        else:
+            # Single mode: one audio object
+            self._audio = audio_obj
+            self._sample_list = np.array(self._audio.get_sample_list(), dtype=np.int16)
+            self._rate = self._audio.get_frame_rate()
+            if len(self._sample_list) == 0:
+                messagebox.showwarning("No Data", "No samples to display.")
+                return
 
         # Tkinter setup
-        # Add audio name
         self._root = tk.Tk()
-        self._root.title("Audio Viewer")
+        if self._dual_mode:
+            self._root.title("Dual Waveform Comparison Viewer")
+        else:
+            self._root.title("Audio Viewer")
 
         # Figure + canvas
-        self._fig = Figure(figsize=(8, 4), dpi=100)
+        if self._dual_mode:
+            self._fig = Figure(figsize=(10, 5), dpi=100)
+        else:
+            self._fig = Figure(figsize=(8, 4), dpi=100)
         self._ax = self._fig.add_subplot(AudioViewer.FULL_PLOT_POSITION)
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._root)
         self._canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -816,28 +895,41 @@ class AudioViewer:
         controls = tk.Frame(self._root)
         controls.pack(pady=10)
 
-        # Create "Waveform" button
-        tk.Button(controls, text="Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=5)
-
-        # Create "Zoomed Waveform" button and time entiries 
-        tk.Label(controls, text="Start (s):").grid(row=0, column=2, padx=5)
-        self.entry_start = tk.Entry(controls, width=6)
-        self.entry_start.grid(row=0, column=3)
-
-        tk.Label(controls, text="End (s):").grid(row=0, column=4, padx=5)
-        self.entry_end = tk.Entry(controls, width=6)
-        self.entry_end.grid(row=0, column=5)
-        
-        tk.Button(controls, text="Zoomed Waveform", command=self.plot_zoom).grid(row=0, column=6, padx=5)
-        
-        # Create "Display Peak Amplitude" button
-        tk.Button(controls, text="Peak Amplitude", command=self.show_peak).grid(row=0, column=1, padx=5)
-
-        # Create button for FFT (Fast Fourier Transform) plot
-        tk.Button(controls, text="Frequency Spectrum (FFT)", command=self.plot_fft).grid(row=0, column=7, padx=5)
-        
-        # Create button for spectrogram plot
-        tk.Button(controls, text="Spectrogram", command=self.plot_spectrogram).grid(row=0, column=8, padx=5)
+        if self._dual_mode:
+            # Dual mode controls
+            tk.Button(controls, text="Full Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=10)
+            
+            tk.Label(controls, text="Start (s):").grid(row=0, column=1, padx=5)
+            self.entry_start = tk.Entry(controls, width=6)
+            self.entry_start.grid(row=0, column=2)
+            
+            tk.Label(controls, text="End (s):").grid(row=0, column=3, padx=5)
+            self.entry_end = tk.Entry(controls, width=6)
+            self.entry_end.grid(row=0, column=4)
+            
+            tk.Button(controls, text="Zoom Waveform", command=self.plot_zoom).grid(row=0, column=5, padx=10)
+            
+            # Legend/Color Key Display
+            tk.Label(controls, fg="darkblue", font=('Arial', 10, 'bold')).grid(row=1, columnspan=6, pady=5)
+        else:
+            # Single mode controls
+            tk.Button(controls, text="Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=5)
+            
+            tk.Label(controls, text="Start (s):").grid(row=0, column=2, padx=5)
+            self.entry_start = tk.Entry(controls, width=6)
+            self.entry_start.grid(row=0, column=3)
+            
+            tk.Label(controls, text="End (s):").grid(row=0, column=4, padx=5)
+            self.entry_end = tk.Entry(controls, width=6)
+            self.entry_end.grid(row=0, column=5)
+            
+            tk.Button(controls, text="Zoomed Waveform", command=self.plot_zoom).grid(row=0, column=6, padx=5)
+            
+            tk.Button(controls, text="Peak Amplitude", command=self.show_peak).grid(row=0, column=1, padx=5)
+            
+            tk.Button(controls, text="Frequency Spectrum (FFT)", command=self.plot_fft).grid(row=0, column=7, padx=5)
+            
+            tk.Button(controls, text="Spectrogram", command=self.plot_spectrogram).grid(row=0, column=8, padx=5)
 
     def clear_cbar(self):
         """
@@ -868,31 +960,91 @@ class AudioViewer:
         self._ax.grid(True)
         self._canvas.draw_idle()
 
+    def _plot_dual(self, y1, y2, x, title):
+        """
+        Helper function to draw two overlaid plots on the Matplotlib canvas.
+
+        Args:
+            y1 (array-like): The Y-axis data for the first audio (blue).
+            y2 (array-like): The Y-axis data for the second audio (red).
+            x (array-like): The common X-axis data (time in seconds).
+            title (str): The title for the plot.
+        """
+        self._ax.clear()
+        
+        # Plot Audio 1 (Blue)
+        self._ax.plot(x[:len(y1)], y1, linewidth=0.5, color="blue", label=self._name1)
+        
+        # Plot Audio 2 (Red)
+        self._ax.plot(x[:len(y2)], y2, linewidth=0.5, color="red", label=self._name2)
+        
+        self._ax.set_xlabel("Time (s)")
+        self._ax.set_ylabel("Amplitude")
+        self._ax.set_title(title)
+        self._ax.grid(True)
+        self._ax.legend(loc='upper right')
+        self._canvas.draw_idle()
+
     def plot_waveform(self):
         """
-        Plots the full audio waveform (Amplitude vs. Time).
+        Plots the full audio waveform(s) (Amplitude vs. Time).
         """
-        duration = len(self._sample_list) / self._rate
-        x = np.linspace(0, duration, num=len(self._sample_list))
-        self.plot(self._sample_list, x, "Full waveform")
+        if self._dual_mode:
+            # Dual mode: plot both waveforms overlaid
+            rate = self._rate
+            max_samples = max(len(self._samples1), len(self._samples2))
+            duration = max_samples / rate
+            x = np.linspace(0, duration, num=max_samples)
+            self._plot_dual(self._samples1, self._samples2, x, "Full Overlaid Waveforms")
+        else:
+            # Single mode: plot single waveform
+            duration = len(self._sample_list) / self._rate
+            x = np.linspace(0, duration, num=len(self._sample_list))
+            self.plot(self._sample_list, x, "Full waveform")
 
     def plot_zoom(self):
         """
-        Plots a zoomed-in portion of the waveform based on user input times.
+        Plots a zoomed-in portion of the waveform(s) based on user input times.
         """
         try:
-            start = float(self.entry_start.get())
-            end = float(self.entry_end.get())
+            start_sec = float(self.entry_start.get())
+            end_sec = float(self.entry_end.get())
         except ValueError:
-            messagebox.showwarning("Invalid Input", "Enter numeric times.")
+            if self._dual_mode:
+                messagebox.showwarning("Invalid Input", "Please enter numeric times.")
+            else:
+                messagebox.showwarning("Invalid Input", "Enter numeric times.")
             return
-        if not (0 <= start < end <= len(self._sample_list) / self._rate): # check this works
-            messagebox.showwarning("Invalid Range", "Out of range.")
-            return
-        start_idx, end_idx = int(start * self._rate), int(end * self._rate)
-        y = self._sample_list[start_idx:end_idx]
-        x = np.linspace(start, end, num=len(y))
-        self.plot(y, x, f"Zoom {start:.2f}-{end:.2f}s")
+        
+        if self._dual_mode:
+            # Dual mode: zoom both waveforms
+            rate = self._rate
+            max_duration = max(len(self._samples1), len(self._samples2)) / rate
+            
+            if not (0 <= start_sec < end_sec <= max_duration):
+                messagebox.showwarning("Invalid Range", 
+                                      f"Range must be within the longest audio duration ({max_duration:.3f} s).")
+                return
+            
+            start_idx = int(start_sec * rate)
+            end_idx = int(end_sec * rate)
+            
+            y1_zoom = self._samples1[start_idx:end_idx]
+            y2_zoom = self._samples2[start_idx:end_idx]
+            
+            x_zoom = np.linspace(start_sec, end_sec, num=len(y1_zoom))
+            
+            self._plot_dual(y1_zoom, y2_zoom, x_zoom, 
+                            f"Zoomed Overlaid Waveforms ({start_sec:.2f}-{end_sec:.2f}s)")
+        else:
+            # Single mode: zoom single waveform
+            if not (0 <= start_sec < end_sec <= len(self._sample_list) / self._rate):
+                messagebox.showwarning("Invalid Range", "Out of range.")
+                return
+            start_idx, end_idx = int(start_sec * self._rate), int(end_sec * self._rate)
+            y = self._sample_list[start_idx:end_idx]
+            x = np.linspace(start_sec, end_sec, num=len(y))
+            self.plot(y, x, f"Zoom {start_sec:.2f}-{end_sec:.2f}s")
         
     def plot_fft(self):
         """
@@ -954,161 +1106,6 @@ class AudioViewer:
             "Max Amplitude",
             f"Peak amplitude: {max_amp}\nTime: {timestamp:.3f} s"
         )
-
-class DualAudioViewer:
-    """
-    GUI class for displaying and comparing two audio waveforms.
-
-    Audio 1 is plotted in Blue, Audio 2 is plotted in Red.
-    Provides options for full waveform and zoomed waveform comparison.
-    """
-    FULL_PLOT_POSITION = 111 
-
-    def __init__(self, audio_obj1, audio_obj2):
-        """
-        Initializes and runs the dual Audio comparison GUI.
-
-        Args:
-            audio_obj1 (Audio): The first Audio object (plotted in blue).
-            audio_obj2 (Audio): The second Audio object (plotted in red).
-        """
-        # --- Data Extraction and Validation ---
-        
-        # Audio 1 Data
-        self._samples1 = np.array(audio_obj1.get_sample_list(), dtype=np.int16)
-        self._rate = audio_obj1.get_frame_rate()
-        self._name1 = getattr(audio_obj1, 'name', 'Audio 1 (Blue)')
-        
-        # Audio 2 Data
-        self._samples2 = np.array(audio_obj2.get_sample_list(), dtype=np.int16)
-        self._name2 = getattr(audio_obj2, 'name', 'Audio 2 (Red)')
-
-        # Basic Check
-        if len(self._samples1) == 0 or len(self._samples2) == 0:
-            messagebox.showwarning("No Data", "One or both audio segments are empty.")
-            return
-
-        # --- Tkinter setup ---
-        self._root = tk.Tk()
-        self._root.title("Dual Waveform Comparison Viewer")
-
-        # Figure + canvas setup
-        self._fig = Figure(figsize=(10, 5), dpi=100)
-        self._ax = self._fig.add_subplot(DualAudioViewer.FULL_PLOT_POSITION)
-        
-        self._canvas = FigureCanvasTkAgg(self._fig, master=self._root)
-        self._canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-
-        # Controls and main loop
-        self.make_controls()
-
-        self._root.mainloop()
-
-    def make_controls(self):
-        """
-        Creates the control buttons and input fields for the Tkinter interface.
-        """
-        controls = tk.Frame(self._root)
-        controls.pack(pady=10)
-
-        # 1. Full Waveform Button
-        tk.Button(controls, text="Full Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=10)
-
-        # 2. Zoomed Waveform Controls
-        tk.Label(controls, text="Start (s):").grid(row=0, column=1, padx=5)
-        self.entry_start = tk.Entry(controls, width=6)
-        self.entry_start.grid(row=0, column=2)
-
-        tk.Label(controls, text="End (s):").grid(row=0, column=3, padx=5)
-        self.entry_end = tk.Entry(controls, width=6)
-        self.entry_end.grid(row=0, column=4)
-        
-        tk.Button(controls, text="Zoom Waveform", command=self.plot_zoom).grid(row=0, column=5, padx=10)
-        
-        # Legend/Color Key Display
-        tk.Label(controls, fg="darkblue", font=('Arial', 10, 'bold')).grid(row=1, columnspan=6, pady=5)
-
-    def _plot_dual(self, y1, y2, x, title):
-        """
-        Helper function to draw two overlaid plots on the Matplotlib canvas.
-
-        Args:
-            y1 (array-like): The Y-axis data for the first audio (blue).
-            y2 (array-like): The Y-axis data for the second audio (red).
-            x (array-like): The common X-axis data (time in seconds).
-            title (str): The title for the plot.
-        """
-        self._ax.clear()
-        
-        # Plot Audio 1 (Blue)
-        # We plot the data against the full time axis 'x'
-        self._ax.plot(x[:len(y1)], y1, linewidth=0.5, color="blue", label=self._name1)
-        
-        # Plot Audio 2 (Red)
-        # The shorter line will naturally end at its last index
-        self._ax.plot(x[:len(y2)], y2, linewidth=0.5, color="red", label=self._name2)
-
-        self._ax.set_xlabel("Time (s)")
-        self._ax.set_ylabel("Amplitude")
-        self._ax.set_title(title)
-        self._ax.grid(True)
-        self._ax.legend(loc='upper right') # Show the label key
-        self._canvas.draw_idle()
-
-    def plot_waveform(self):
-        """
-        Displays the complete, overlaid waveform of both audio signals.
-
-        .. figure:: _static/dual_waveform_graphic.png
-           :width: 80%
-           :align: left
-           :alt: Example plot of an audio waveform
-        """
-        rate = self._rate
-        
-        # Use the maximum sample count for the time axis length
-        max_samples = max(len(self._samples1), len(self._samples2))
-        duration = max_samples / rate
-        x = np.linspace(0, duration, num=max_samples)
-
-        self._plot_dual(self._samples1, self._samples2, x, "Full Overlaid Waveforms")
-
-    def plot_zoom(self):
-        """
-        Displays a zoomed-in, overlaid waveform for a specified time interval.
-        """
-        try:
-            start_sec = float(self.entry_start.get())
-            end_sec = float(self.entry_end.get())
-        except ValueError:
-            messagebox.showwarning("Invalid Input", "Please enter numeric times.")
-            return
-
-        rate = self._rate
-        duration1 = len(self._samples1) / rate
-        duration2 = len(self._samples2) / rate
-
-        # Use the duration of the longest audio for range checking
-        max_duration = max(len(self._samples1), len(self._samples2)) / rate
-        
-        if not (0 <= start_sec < end_sec <= max_duration): 
-            messagebox.showwarning("Invalid Range", 
-                                  f"Range must be within the longest audio duration ({max_duration:.3f} s).")
-            return
-
-        # Calculate sample indices
-        start_idx = int(start_sec * rate)
-        end_idx = int(end_sec * rate)
-        
-        # Slice the data for both audios
-        y1_zoom = self._samples1[start_idx:end_idx]
-        y2_zoom = self._samples2[start_idx:end_idx]
-        
-        # Create the time axis for the zoomed segment
-        x_zoom = np.linspace(start_sec, end_sec, num=len(y1_zoom))
-        
-        self._plot_dual(y1_zoom, y2_zoom, x_zoom, 
-                        f"Zoomed Overlaid Waveforms ({start_sec:.2f}-{end_sec:.2f}s)")
 
 # Dictionary for the frequncies of musical notes
 music_note_dict = {"C0":16, "C#0":17, "Db0": 17, "D0":18, "D#0":19, "Eb0":19, "E0":21,
