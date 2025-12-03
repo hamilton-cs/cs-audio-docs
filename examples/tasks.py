@@ -2,6 +2,11 @@
 Demo tasks for CS 101 audio library
 """
 
+# Allow importing cs101audio from parent directory, as this file is in subdirectory
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from cs101audio import *
 
 # Constants for 16-bit audio (signed short integer)

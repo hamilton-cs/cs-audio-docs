@@ -2,6 +2,11 @@
 Demo usage/tasks for CS 101 audio library
 """
 
+# Allow importing cs101audio from parent directory, as this file is in subdirectory
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from cs101audio import *
 
 def compare_waves():
@@ -143,13 +148,44 @@ def chord():
     C4.play()
     C4.view()
 
+def silence_every_n(audio, n):
+    """
+    Silences every nth entry in the sample list by setting those samples to 0.
+    
+    Arguments:
+    audio -- The Audio object to modify (Audio)
+    n -- The interval at which to silence samples (int). Every nth sample 
+         (indices 0, n, 2n, 3n, ...) will be set to 0.
+    
+    Modifies the Audio object in-place.
+    
+    Expected Observation:
+    - The audio will have periodic silence points, creating a stuttering effect.
+    - The waveform plot will show zero-amplitude points at regular intervals.
+    """
+    samples = audio.get_sample_list()
+    
+    # Silence every nth sample (starting from index 0)
+    for i in range(0, len(samples), n):
+        samples[i] = 0
+    
+    audio.from_sample_list(samples)
+
 def main():
-    # compare_waves()
-    # speed_affects_freq(4)
-    # fade()
+    compare_waves()
+    speed_affects_freq(4)
+    fade()
     # normalize_crescendo()
     # clip_amplitude(20000)
     # chord()
+
+    sine = Audio()
+    sine.from_generator(220, 2000, "sine")
+    # sine.apply_gain(9)
+    # sine.decrescendo(start_time="HI", end_time=2000)
+    # print(sine.get_amplitude_at(1001))
+    # sine.play()
+    # sine.view()
 
 if __name__ == "__main__":
     main()
