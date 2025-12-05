@@ -1,0 +1,1081 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cs101audio &mdash; CS101 Audio 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CS101 Audio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CS101 Audio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cs101audio</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cs101audio</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A Pydub-based audio library for introductory computer science.</span>
+
+<span class="sd">All files that use the CS101 Audio package must have the following line</span>
+<span class="sd">at the top of the file:</span>
+
+<span class="sd">from cs101audio import *</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub</span><span class="w"> </span><span class="kn">import</span> <span class="n">AudioSegment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub.generators</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub.generators</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sawtooth</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub.generators</span><span class="w"> </span><span class="kn">import</span> <span class="n">Square</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub.generators</span><span class="w"> </span><span class="kn">import</span> <span class="n">Triangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydub.playback</span><span class="w"> </span><span class="kn">import</span> <span class="n">play</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span> <span class="c1"># For ignoring a PyDub warning that runs everytime you run your code</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Couldn&#39;t find ffmpeg or avconv - defaulting to ffmpeg, but may not work&quot;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Couldn&#39;t find ffplay or avplay - defaulting to ffplay, but may not work&quot;</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>  <span class="c1"># Used for FFT calculations in pitch_at_time method</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">audio_viewer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AudioViewer</span> <span class="c1"># Import AudioViewer</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_type</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">target_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if a parameter is of the correct type and raises a TypeError if not.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param (any): The parameter to check.</span>
+<span class="sd">        param_name (str): The name of the parameter (for the error message).</span>
+<span class="sd">        target_type (type or tuple): The expected type(s) (e.g., int, str, Audio, or (int, float)).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If &#39;param&#39; is not an instance of &#39;target_type&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">target_type</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">type_names</span> <span class="o">=</span> <span class="s2">&quot; or &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">target_type</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">type_names</span> <span class="o">=</span> <span class="n">target_type</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The parameter &#39;&quot;</span> <span class="o">+</span> <span class="n">param_name</span> <span class="o">+</span> <span class="s2">&quot;&#39; should be a &quot;</span> <span class="o">+</span>
+                        <span class="n">type_names</span> <span class="o">+</span>
+                        <span class="s2">&quot; but instead was a &quot;</span> <span class="o">+</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="n">param_name</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Audio">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Audio</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper Class for the Pydub AudioSegment Class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># 16-bit PCM amplitude limits as class-level attributes</span>
+    <span class="n">MAX_AMPLITUDE</span> <span class="o">=</span> <span class="mi">32767</span>
+    <span class="n">MIN_AMPLITUDE</span> <span class="o">=</span> <span class="o">-</span><span class="mi">32768</span>
+
+<div class="viewcode-block" id="Audio.__init__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">frame_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a silent audio segment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            duration (int, optional): The length of the silent audio segment</span>
+<span class="sd">                in milliseconds. Defaults to 0.</span>
+<span class="sd">            frame_rate (int, optional): The frame rate in frames per second.</span>
+<span class="sd">                Defaults to 44100.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">frame_rate</span><span class="p">,</span> <span class="s2">&quot;frame_rate&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">AudioSegment</span><span class="o">.</span><span class="n">silent</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">frame_rate</span><span class="o">=</span><span class="n">frame_rate</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Audio.set_audioseg">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.set_audioseg">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_audioseg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newaudio</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the internal pydub.AudioSegment object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newaudio (pydub.AudioSegment): The new audio segment to replace</span>
+<span class="sd">                self._audioseg.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">newaudio</span></div>
+
+
+<div class="viewcode-block" id="Audio.get_audioseg">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.get_audioseg">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_audioseg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the internal pydub.AudioSegment object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pydub.AudioSegment: The internal audio segment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span></div>
+
+
+<div class="viewcode-block" id="Audio.get_sample_list">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.get_sample_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the audio data as a list of samples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]: The list of audio samples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">get_array_of_samples</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="Audio.get_frame_rate">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.get_frame_rate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_frame_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the frame rate of the audio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The frame rate in Hz (frames per second).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">frame_rate</span></div>
+
+
+<div class="viewcode-block" id="Audio.__len__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__len__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the length of the audio in milliseconds.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The duration of the audio in milliseconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.open_audio_file">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.open_audio_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens an audio file and loads it into this Audio object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): The path to the audio file to open.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If the specified file does not exist.</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            audio = Audio()</span>
+<span class="sd">            audio.open_audio_file(&quot;example.wav&quot;)</span>
+<span class="sd">            audio.play()</span>
+
+<span class="sd">            # create and play a new audio object using a file &quot;example.wav&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">AudioSegment</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;File &quot;</span> <span class="o">+</span> <span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot; not found&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">AudioSegment</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+        
+        
+<div class="viewcode-block" id="Audio.save_to_file">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.save_to_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the audio to a file.</span>
+
+<span class="sd">        The file format is determined by the file extension (e.g., &quot;.wav&quot;, &quot;.mp3&quot;).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): The name of the file to save to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">extendindex</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[</span><span class="n">extendindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+      
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">out_f</span><span class="o">=</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> \
+                              <span class="nb">format</span><span class="o">=</span><span class="n">file_extension</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.from_sample_list">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.from_sample_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_lst</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads audio data from a list of samples.</span>
+
+<span class="sd">        This method uses metadata (like frame rate, sample width) from a</span>
+<span class="sd">        template Audio object. If no template is provided, it uses its own</span>
+<span class="sd">        current metadata.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sample_lst (list[int]): The list of samples to generate the audio from.</span>
+<span class="sd">            template (Audio, optional): An Audio object to use as a template</span>
+<span class="sd">                for metadata. Defaults to self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">sample_lst</span><span class="p">,</span> <span class="s2">&quot;sample_lst&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_check_type</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s2">&quot;template&quot;</span><span class="p">,</span> <span class="n">Audio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_lst</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">sample_lst</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">sample_lst</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span>
+            
+        <span class="c1"># If an sample list is spliced, it may have a incorret total number of samples</span>
+        <span class="c1"># When attempting to play this, an error occurs because the total sample</span>
+        <span class="c1"># count is not a multiple of 4 and the number of channels</span>
+        <span class="c1"># So if this occurs, we append 0s until it is a multiple</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_lst</span><span class="p">)</span> <span class="o">*</span> <span class="n">template</span><span class="o">.</span><span class="n">get_audioseg</span><span class="p">()</span><span class="o">.</span><span class="n">channels</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sample_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">get_audioseg</span><span class="p">()</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">sample_lst</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.from_generator">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.from_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">wavetype</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a wave and loads it into this Audio object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            freq (int): The frequency of the wave to be generated (in Hz).</span>
+<span class="sd">            duration (int): The duration of the wave (in milliseconds).</span>
+<span class="sd">            wavetype (str): The type of wave (&quot;Sine&quot;, &quot;Square&quot;, &quot;Sawtooth&quot;,</span>
+<span class="sd">                or &quot;Triangle&quot;). Case-insensitive.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If an invalid &#39;wavetype&#39; is provided.</span>
+<span class="sd">            TypeError: If &#39;freq&#39; or &#39;duration&#39; are not ints, or &#39;wavetype&#39;</span>
+<span class="sd">                is not a str.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">wavetype</span><span class="p">,</span> <span class="s2">&quot;wavetype&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">duration</span>
+        <span class="k">if</span> <span class="n">wavetype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;SINE&quot;</span><span class="p">:</span>
+            <span class="n">wave</span> <span class="o">=</span> <span class="n">Sine</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">wavetype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;SAWTOOTH&quot;</span><span class="p">:</span>
+            <span class="n">wave</span> <span class="o">=</span> <span class="n">Sawtooth</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">wavetype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;SQUARE&quot;</span><span class="p">:</span>
+            <span class="n">wave</span> <span class="o">=</span> <span class="n">Square</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">wavetype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;TRIANGLE&quot;</span><span class="p">:</span>
+            <span class="n">wave</span> <span class="o">=</span> <span class="n">Triangle</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error! Invalid Wavetype </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">wavetype</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> passed to from_generator&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">to_audio_segment</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span></div>
+
+        <span class="c1">#self._audioseg = self._audioseg.fade_in(50).fade_out(100)</span>
+
+<div class="viewcode-block" id="Audio.play">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plays the current audio segment, if it isn&#39;t empty.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">play</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="p">)</span></div>
+
+            
+
+<div class="viewcode-block" id="Audio.__add__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__add__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_audio</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates this audio with another. (Implements the + operator).</span>
+
+<span class="sd">        Does not modify the original Audio objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_audio (Audio): The audio object to append to the end of this one.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Audio: A new Audio object containing the concatenated audio.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">other_audio</span><span class="p">,</span> <span class="s2">&quot;other_audio&quot;</span><span class="p">,</span> <span class="n">Audio</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Audio</span><span class="p">()</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">set_audioseg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">+</span> <span class="n">other_audio</span><span class="o">.</span><span class="n">get_audioseg</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Audio.__iadd__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__iadd__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_audio</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates another audio in-place. (Implements the += operator).</span>
+
+<span class="sd">        Modifies this Audio object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_audio (Audio): The audio object to append.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Audio: self, modified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">other_audio</span><span class="p">,</span> <span class="s2">&quot;other_audio&quot;</span><span class="p">,</span> <span class="n">Audio</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">+=</span> <span class="n">other_audio</span><span class="o">.</span><span class="n">get_audioseg</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+
+<div class="viewcode-block" id="Audio.__mul__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__mul__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loopnum</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Repeats (loops) the audio segment. (Implements the * operator).</span>
+
+<span class="sd">        Does not modify the original Audio object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loopnum (int): The number of times to repeat the audio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Audio: A new Audio object containing the looped audio.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">loopnum</span><span class="p">,</span> <span class="s2">&quot;loopnum&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Audio</span><span class="p">()</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">set_audioseg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">*</span> <span class="n">loopnum</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Audio.__imul__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__imul__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loopnum</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Repeats (loops) the audio segment in-place. (Implements the *= operator).</span>
+
+<span class="sd">        Modifies this Audio object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loopnum (int): The number of times to repeat the audio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Audio: self, modified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">loopnum</span><span class="p">,</span> <span class="s2">&quot;loopnum&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">*=</span> <span class="n">loopnum</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Audio.__getitem__">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.__getitem__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">millisecond</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a slice of the audio. (Implements the [] operator).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            millisecond (int or slice): The millisecond to index or a slice</span>
+<span class="sd">                object (e.g., `slice(1000, 2000)` for 1s to 2s).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Audio: A new Audio object containing the specified slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Audio</span><span class="p">()</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">set_audioseg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="p">[</span><span class="n">millisecond</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="Audio.overlay">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.overlay">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio2</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overlays (mixes) another audio onto this one.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            audio2 (Audio): The audio object to overlay.</span>
+<span class="sd">            position (int, optional): The time in milliseconds at which to</span>
+<span class="sd">                start the overlay. Defaults to 0.</span>
+<span class="sd">            loop (bool, optional): If True, loops &#39;audio2&#39; to fill the</span>
+<span class="sd">                duration of this audio. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">audio2</span><span class="p">,</span> <span class="s2">&quot;audio2&quot;</span><span class="p">,</span> <span class="n">Audio</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="s2">&quot;loop&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">audio2</span><span class="o">.</span><span class="n">get_audioseg</span><span class="p">(),</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="Audio.apply_gain">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.apply_gain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a gain (volume change) to the audio.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gain (int or float): The amount of gain in decibels (dB).</span>
+<span class="sd">                Positive values make it louder, negative values make it quieter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="s2">&quot;gain&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">apply_gain</span><span class="p">(</span><span class="n">gain</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="Audio.fade_in">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.fade_in">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fade_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fadetime</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a fade-in to the beginning of the audio.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fadetime (int): The duration of the fade-in (in milliseconds).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">fadetime</span><span class="p">,</span> <span class="s2">&quot;fadetime&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">fade_in</span><span class="p">(</span><span class="n">fadetime</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="Audio.fade_out">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.fade_out">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fade_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fadetime</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a fade-out to the end of the audio.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fadetime (int): The duration of the fade-out (in milliseconds).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">fadetime</span><span class="p">,</span> <span class="s2">&quot;fadetime&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">fade_out</span><span class="p">(</span><span class="n">fadetime</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="Audio.fade">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.fade">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fade</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fadeintime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fadeouttime</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies both a fade-in and a fade-out.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fadeintime (int, optional): The duration of the fade-in</span>
+<span class="sd">                (in milliseconds). Defaults to 0.</span>
+<span class="sd">            fadeouttime (int, optional): The duration of the fade-out</span>
+<span class="sd">                (in milliseconds). Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">fadeintime</span><span class="p">,</span> <span class="s2">&quot;fadeintime&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">fadeouttime</span><span class="p">,</span> <span class="s2">&quot;fadeouttime&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">fade_in</span><span class="p">(</span><span class="n">fadeintime</span><span class="p">)</span><span class="o">.</span><span class="n">fade_out</span><span class="p">(</span><span class="n">fadeouttime</span><span class="p">)</span></div>
+
+        
+
+<div class="viewcode-block" id="Audio.change_speed">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.change_speed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">change_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Changes the speed of the audio without changing the pitch.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            factor (int or float): The speed multiplier.</span>
+<span class="sd">                (e.g., 2.0 is 2x speed, 0.5 is half speed).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If &#39;factor&#39; is not an int or float.</span>
+<span class="sd">            ValueError: If &#39;factor&#39; is 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The parameter &#39;&quot;</span> <span class="o">+</span> <span class="n">factor</span> <span class="o">+</span> <span class="s2">&quot;&#39; should be a &quot;</span> <span class="o">+</span>
+                        <span class="s2">&quot;int or float but instead was a &quot;</span> <span class="o">+</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="s2">&quot;factor&quot;</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">factor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">factor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error! Cannot change speed by a factor of 0&quot;</span><span class="p">)</span>
+
+        <span class="n">sound_with_altered_frame_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">overrides</span><span class="o">=</span><span class="p">{</span>
+                                        <span class="s2">&quot;frame_rate&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">frame_rate</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)})</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span> <span class="o">=</span> <span class="n">sound_with_altered_frame_rate</span><span class="o">.</span><span class="n">set_frame_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">frame_rate</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.normalize">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.normalize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_amplitude</span><span class="o">=</span><span class="n">MAX_AMPLITUDE</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalizes the audio to a specific peak amplitude.</span>
+
+<span class="sd">        Adjusts the amplitude so the loudest sample (positive or negative)</span>
+<span class="sd">        matches &#39;max_amplitude&#39;, scaling all other samples proportionally.</span>
+<span class="sd">        This makes the audio as loud as possible without clipping.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_amplitude (int, optional): The target peak absolute amplitude.</span>
+<span class="sd">                Defaults to MAX_AMPLITUDE (32767).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If &#39;max_amplitude&#39; is negative or &gt; MAX_AMPLITUDE.</span>
+<span class="sd">            ZeroDivisionError: If the audio is completely silent (all samples are 0).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">max_amplitude</span><span class="p">,</span> <span class="s2">&quot;max_amplitude&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_amplitude</span> <span class="o">&gt;</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MAX_AMPLITUDE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max amplitude cannot exceed 32,767. Got </span><span class="si">{</span><span class="n">max_amplitude</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">max_amplitude</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max amplitude must be positive. Got </span><span class="si">{</span><span class="n">max_amplitude</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">get_array_of_samples</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">largest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span>
+        <span class="n">smallest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">smallest</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">largest</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">peak</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ZeroDivisionError</span><span class="p">(</span><span class="s2">&quot;Audio is silent; normalization skipped.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">multiplier</span> <span class="o">=</span> <span class="n">max_amplitude</span> <span class="o">/</span> <span class="n">peak</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)):</span>
+            <span class="n">sample_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_sample_list</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Audio.reverse">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.reverse">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reverses the audio.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_sample_list</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">())))</span></div>
+
+
+<div class="viewcode-block" id="Audio.average_amplitude">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.average_amplitude">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">average_amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the average absolute amplitude over a time range.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_time (float, optional): The start time of the range</span>
+<span class="sd">                (in miliseconds). Defaults to 0.</span>
+<span class="sd">            end_time (float, optional): The end time of the range</span>
+<span class="sd">                (in miliseconds). Defaults to the end of the audio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The average absolute amplitude of the samples in the range.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If times are negative or &#39;start_time&#39; &gt;= &#39;end_time&#39;</span>
+<span class="sd">                or times are outside the audio duration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_check_type</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;end_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span>
+        
+        <span class="c1"># Default to full length if end_time not given</span>
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">duration</span>
+
+        <span class="c1"># Verify valid start and end times</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start and end times must be non-negative. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration</span> <span class="ow">and</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both start_time and end_time exceed the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, but duration is </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time exceeds the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, but duration is </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;end_time exceeds the audio duration. Got end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, but duration is </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;=</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time must be less than end_time. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Convert times to sample indices</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+        <span class="c1"># Value verification</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">),</span> <span class="n">end_idx</span><span class="p">)</span>
+
+        <span class="c1"># Slice and compute mean absolute amplitude</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">sample_list</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        
+        <span class="n">avg_amp</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">segment</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="k">if</span> <span class="n">segment</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+        <span class="k">return</span> <span class="n">avg_amp</span></div>
+
+
+<div class="viewcode-block" id="Audio.pitch_at_time">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.pitch_at_time">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pitch_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates the dominant frequency (pitch) at a specific time.</span>
+
+<span class="sd">        Uses an FFT (Fast Fourier Transform) on a small window of audio</span>
+<span class="sd">        around the specified time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            time (float): The time (in miliseconds) to analyze.</span>
+<span class="sd">            window (float, optional): The size of the analysis window</span>
+<span class="sd">                (in miliseconds). Defaults to 50 milliseconds</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The estimated dominant frequency in Hz.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If &#39;time&#39; is outside the audio duration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="s2">&quot;window&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audioseg</span><span class="o">.</span><span class="n">get_array_of_samples</span><span class="p">()</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span>
+        
+        <span class="c1"># Convert ms inputs to seconds</span>
+        <span class="n">time_s</span> <span class="o">=</span> <span class="n">time</span> <span class="o">/</span> <span class="mf">1000.0</span>
+        <span class="n">window_s</span> <span class="o">=</span> <span class="n">window</span> <span class="o">/</span> <span class="mf">1000.0</span>
+        <span class="n">duration_s</span> <span class="o">=</span> <span class="n">duration_ms</span> <span class="o">/</span> <span class="mf">1000.0</span>
+
+        <span class="k">if</span> <span class="n">time_s</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp must be non-negative. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time_s</span> <span class="o">&gt;</span> <span class="n">duration_s</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp exceeds audio duration. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Define segment boundaries in seconds</span>
+        <span class="n">start_time_s</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">-</span> <span class="p">(</span><span class="n">window_s</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">end_time_s</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">+</span> <span class="p">(</span><span class="n">window_s</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Make sure start and end time are within the audio&#39;s duration (in seconds)</span>
+        <span class="k">if</span> <span class="n">start_time_s</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> 
+            <span class="n">start_time_s</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">end_time_s</span> <span class="o">&gt;</span> <span class="n">duration_s</span><span class="p">:</span> 
+            <span class="n">end_time_s</span> <span class="o">=</span> <span class="n">duration_s</span>
+
+        <span class="c1"># Convert seconds to sample indices</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_s</span> <span class="o">*</span> <span class="n">rate</span><span class="p">)</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_s</span> <span class="o">*</span> <span class="n">rate</span><span class="p">)</span>
+
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Remove direct current offset</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">segment</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+
+        <span class="c1"># FFT</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">rate</span><span class="p">)</span>
+
+        <span class="c1"># Only take the positive frequencies</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[:</span><span class="n">half</span><span class="p">])</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">freqs</span><span class="p">[:</span><span class="n">half</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Find the dominant frequency in the window</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span></div>
+
+    
+<div class="viewcode-block" id="Audio.get_amplitude_at">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.get_amplitude_at">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_amplitude_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the raw sample amplitude at a specific time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            time (float): The time (in miliseconds) to get the sample from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The amplitude of the sample at that time.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If &#39;time&#39; is outside the audio duration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp must be non-negative. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp exceeds audio duration. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">sample_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Audio.set_amplitude_at">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.set_amplitude_at">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_amplitude_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the raw sample amplitude at a specific time.</span>
+
+<span class="sd">        Modifies this Audio object in-place. The value will be clamped to</span>
+<span class="sd">        the valid 16-bit range (MIN_AMPLITUDE to MAX_AMPLITUDE).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            time (float): The time (in miliseconds) of the sample to set.</span>
+<span class="sd">            value (int): The new amplitude value to set.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If &#39;time&#39; is outside the audio duration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp must be non-negative. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestamp exceeds audio duration. Got </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Clamp to legal sample range</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MAX_AMPLITUDE</span><span class="p">),</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MIN_AMPLITUDE</span><span class="p">)</span>
+
+        <span class="n">sample_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_sample_list</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Audio.crescendo">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.crescendo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crescendo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">final_multiplier</span><span class="o">=</span><span class="mf">1.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a crescendo (gradual volume increase) over a time range.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_time (float, optional): The time (in miliseconds) to begin</span>
+<span class="sd">                the crescendo. Defaults to 0.</span>
+<span class="sd">            end_time (float, optional): The time (in miliseconds) to end</span>
+<span class="sd">                the crescendo. Defaults to the end of the audio.</span>
+<span class="sd">            final_multiplier (float, optional): The amplitude multiplier to</span>
+<span class="sd">                reach at the end of the crescendo. (e.g., 1.5 is 1.5x louder).</span>
+<span class="sd">                Defaults to 1.5.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If times are invalid or out of range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_check_type</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;end_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">final_multiplier</span><span class="p">,</span> <span class="s2">&quot;final_multiplier&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span> 
+        
+        <span class="c1"># Calculate total duration in ms</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span> 
+
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">duration_ms</span>
+
+        <span class="c1"># Validation in ms</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start and end times must be non-negative. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span> <span class="ow">and</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both start_time and end_time exceed the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time exceeds the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;end_time exceeds the audio duration. Got end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;=</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time must be less than end_time. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">final_multiplier</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final multiplier must be non-negative. Got </span><span class="si">{</span><span class="n">final_multiplier</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">end_idx</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time</span>   <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Linearly ramp from 1.0 to final_multiplier</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+            <span class="c1"># progress goes from 0.0 to 1.0 across crescendo segment</span>
+            <span class="n">progress</span> <span class="o">=</span> <span class="n">i</span> <span class="o">/</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> 
+            <span class="n">multiplier</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">progress</span> <span class="o">*</span> <span class="p">(</span><span class="n">final_multiplier</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">new_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_list</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">)</span>
+
+            <span class="c1"># Clamp to safe 16-bit range</span>
+            <span class="n">new_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">new_val</span><span class="p">,</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MAX_AMPLITUDE</span><span class="p">),</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MIN_AMPLITUDE</span><span class="p">)</span>
+            <span class="n">sample_list</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_sample_list</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.decrescendo">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.decrescendo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decrescendo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_multiplier</span><span class="o">=</span><span class="mf">1.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a decrescendo (gradual volume decrease) over a time range.</span>
+
+<span class="sd">        Modifies this Audio object in-place.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_time (float, optional): The time (in miliseconds) to begin</span>
+<span class="sd">                the decrescendo. Defaults to 0.</span>
+<span class="sd">            end_time (float, optional): The time (in miliseconds) to end</span>
+<span class="sd">                the decrescendo. Defaults to the end of the audio.</span>
+<span class="sd">            initial_multiplier (float, optional): How loud the start should </span>
+<span class="sd">                be (e.g., 1.5 for 50% louder)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If times are invalid or out of range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_check_type</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;end_time&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">initial_multiplier</span><span class="p">,</span> <span class="s2">&quot;initial_multiplier&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">sample_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_list</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_rate</span><span class="p">()</span> 
+        
+        <span class="c1"># Calculate total duration in ms</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">rate</span> 
+
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">duration_ms</span>
+
+        <span class="c1"># Validation in ms </span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start and end times must be non-negative. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span> <span class="ow">or</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span> <span class="ow">and</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both start_time and end_time exceed the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">duration_ms</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time exceeds the audio duration. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;end_time exceeds the audio duration. Got end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms, but duration is </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;=</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start_time must be less than end_time. Got start_time=</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">ms, end_time=</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">ms.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_multiplier</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial multiplier must be non-negative. Got </span><span class="si">{</span><span class="n">initial_multiplier</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">end_idx</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time</span>   <span class="o">*</span> <span class="n">rate</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Linearly ramp from initial_multiplier down to 1.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+            <span class="c1"># progress goes from 0.0 -&gt; 1.0 across decrescendo segment</span>
+            <span class="n">progress</span> <span class="o">=</span> <span class="n">i</span> <span class="o">/</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> 
+            <span class="n">multiplier</span> <span class="o">=</span> <span class="n">initial_multiplier</span> <span class="o">-</span> <span class="n">progress</span> <span class="o">*</span> <span class="p">(</span><span class="n">initial_multiplier</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+            
+            <span class="n">new_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_list</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">)</span>
+
+            <span class="c1"># Clamp to safe 16-bit range</span>
+            <span class="n">new_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">new_val</span><span class="p">,</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MAX_AMPLITUDE</span><span class="p">),</span> <span class="n">Audio</span><span class="o">.</span><span class="n">MIN_AMPLITUDE</span><span class="p">)</span>
+            <span class="n">sample_list</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_sample_list</span><span class="p">(</span><span class="n">sample_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.view">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.view">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens a GUI window to visualize this audio (waveform, FFT, etc.).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">AudioViewer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Audio.view_with">
+<a class="viewcode-back" href="../api.html#cs101audio.Audio.view_with">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens a GUI window to compare this audio with another.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (Audio): The second Audio object to compare against.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If &#39;other&#39; is not an Audio object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_type</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;other&quot;</span><span class="p">,</span> <span class="n">Audio</span><span class="p">)</span>
+        <span class="n">AudioViewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span></div>
+</div>
+
+
+
+
+<span class="c1"># Dictionary for the frequncies of musical notes</span>
+<span class="n">music_note_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;C0&quot;</span><span class="p">:</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;C#0&quot;</span><span class="p">:</span><span class="mi">17</span><span class="p">,</span> <span class="s2">&quot;Db0&quot;</span><span class="p">:</span> <span class="mi">17</span><span class="p">,</span> <span class="s2">&quot;D0&quot;</span><span class="p">:</span><span class="mi">18</span><span class="p">,</span> <span class="s2">&quot;D#0&quot;</span><span class="p">:</span><span class="mi">19</span><span class="p">,</span> <span class="s2">&quot;Eb0&quot;</span><span class="p">:</span><span class="mi">19</span><span class="p">,</span> <span class="s2">&quot;E0&quot;</span><span class="p">:</span><span class="mi">21</span><span class="p">,</span>
+                   <span class="s2">&quot;F0&quot;</span><span class="p">:</span><span class="mi">22</span><span class="p">,</span> <span class="s2">&quot;F#0&quot;</span><span class="p">:</span><span class="mi">23</span><span class="p">,</span> <span class="s2">&quot;Gb0&quot;</span><span class="p">:</span><span class="mi">23</span><span class="p">,</span> <span class="s2">&quot;G0&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;G#0&quot;</span><span class="p">:</span><span class="mi">26</span><span class="p">,</span> <span class="s2">&quot;Ab0&quot;</span><span class="p">:</span><span class="mi">26</span><span class="p">,</span> <span class="s2">&quot;A0&quot;</span><span class="p">:</span><span class="mi">28</span><span class="p">,</span>
+                   <span class="s2">&quot;A#0&quot;</span><span class="p">:</span><span class="mi">29</span><span class="p">,</span> <span class="s2">&quot;Bb0&quot;</span><span class="p">:</span><span class="mi">29</span><span class="p">,</span> <span class="s2">&quot;B0&quot;</span><span class="p">:</span><span class="mi">31</span><span class="p">,</span> <span class="s2">&quot;C1&quot;</span><span class="p">:</span><span class="mi">33</span><span class="p">,</span> <span class="s2">&quot;C#1&quot;</span><span class="p">:</span><span class="mi">35</span><span class="p">,</span> <span class="s2">&quot;Db1&quot;</span><span class="p">:</span><span class="mi">35</span><span class="p">,</span> <span class="s2">&quot;D1&quot;</span><span class="p">:</span><span class="mi">37</span><span class="p">,</span>
+                   <span class="s2">&quot;D#1&quot;</span><span class="p">:</span><span class="mi">39</span><span class="p">,</span> <span class="s2">&quot;E1&quot;</span><span class="p">:</span><span class="mi">41</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">:</span><span class="mi">44</span><span class="p">,</span> <span class="s2">&quot;F#1&quot;</span><span class="p">:</span><span class="mi">46</span><span class="p">,</span> <span class="s2">&quot;Gb1&quot;</span><span class="p">:</span> <span class="mi">46</span><span class="p">,</span> <span class="s2">&quot;G1&quot;</span><span class="p">:</span> <span class="mi">49</span><span class="p">,</span> <span class="s2">&quot;G#1&quot;</span><span class="p">:</span><span class="mi">52</span><span class="p">,</span>
+                   <span class="s2">&quot;Ab1&quot;</span><span class="p">:</span><span class="mi">52</span><span class="p">,</span> <span class="s2">&quot;A1&quot;</span><span class="p">:</span><span class="mi">55</span><span class="p">,</span> <span class="s2">&quot;A#1&quot;</span><span class="p">:</span><span class="mi">58</span><span class="p">,</span> <span class="s2">&quot;Bb1&quot;</span><span class="p">:</span><span class="mi">58</span><span class="p">,</span> <span class="s2">&quot;B1&quot;</span><span class="p">:</span><span class="mi">62</span><span class="p">,</span> <span class="s2">&quot;C2&quot;</span><span class="p">:</span><span class="mi">65</span><span class="p">,</span> <span class="s2">&quot;C#2&quot;</span><span class="p">:</span><span class="mi">69</span><span class="p">,</span>
+                   <span class="s2">&quot;Db2&quot;</span><span class="p">:</span><span class="mi">69</span><span class="p">,</span> <span class="s2">&quot;D2&quot;</span><span class="p">:</span><span class="mi">73</span><span class="p">,</span> <span class="s2">&quot;D#2&quot;</span><span class="p">:</span><span class="mi">78</span><span class="p">,</span> <span class="s2">&quot;Eb2&quot;</span><span class="p">:</span><span class="mi">78</span><span class="p">,</span> <span class="s2">&quot;E2&quot;</span><span class="p">:</span><span class="mi">82</span><span class="p">,</span> <span class="s2">&quot;F2&quot;</span><span class="p">:</span><span class="mi">87</span><span class="p">,</span> <span class="s2">&quot;F#2&quot;</span><span class="p">:</span><span class="mi">92</span><span class="p">,</span> <span class="s2">&quot;Gb2&quot;</span><span class="p">:</span><span class="mi">92</span><span class="p">,</span>
+                   <span class="s2">&quot;G2&quot;</span><span class="p">:</span><span class="mi">98</span><span class="p">,</span> <span class="s2">&quot;G#2&quot;</span><span class="p">:</span><span class="mi">104</span><span class="p">,</span> <span class="s2">&quot;Ab2&quot;</span><span class="p">:</span><span class="mi">104</span><span class="p">,</span> <span class="s2">&quot;A2&quot;</span><span class="p">:</span><span class="mi">110</span><span class="p">,</span> <span class="s2">&quot;A#2&quot;</span><span class="p">:</span><span class="mi">116</span><span class="p">,</span> <span class="s2">&quot;Bb2&quot;</span><span class="p">:</span><span class="mi">116</span><span class="p">,</span> <span class="s2">&quot;B2&quot;</span><span class="p">:</span><span class="mi">123</span><span class="p">,</span>
+                   <span class="s2">&quot;C3&quot;</span><span class="p">:</span><span class="mi">131</span><span class="p">,</span> <span class="s2">&quot;C#3&quot;</span><span class="p">:</span><span class="mi">139</span><span class="p">,</span> <span class="s2">&quot;Db3&quot;</span><span class="p">:</span><span class="mi">139</span><span class="p">,</span> <span class="s2">&quot;D3&quot;</span><span class="p">:</span><span class="mi">147</span><span class="p">,</span> <span class="s2">&quot;D#3&quot;</span><span class="p">:</span><span class="mi">156</span><span class="p">,</span> <span class="s2">&quot;Eb3&quot;</span><span class="p">:</span><span class="mi">156</span><span class="p">,</span><span class="s2">&quot;E3&quot;</span><span class="p">:</span><span class="mi">165</span><span class="p">,</span>
+                   <span class="s2">&quot;F3&quot;</span><span class="p">:</span><span class="mi">175</span><span class="p">,</span> <span class="s2">&quot;F#3&quot;</span><span class="p">:</span><span class="mi">185</span><span class="p">,</span> <span class="s2">&quot;Gb3&quot;</span><span class="p">:</span> <span class="mi">185</span><span class="p">,</span> <span class="s2">&quot;G3&quot;</span><span class="p">:</span><span class="mi">196</span><span class="p">,</span> <span class="s2">&quot;G#3&quot;</span><span class="p">:</span><span class="mi">208</span><span class="p">,</span> <span class="s2">&quot;Ab3&quot;</span><span class="p">:</span><span class="mi">208</span><span class="p">,</span> <span class="s2">&quot;A3&quot;</span><span class="p">:</span><span class="mi">220</span><span class="p">,</span>
+                   <span class="s2">&quot;A#3&quot;</span><span class="p">:</span><span class="mi">233</span><span class="p">,</span> <span class="s2">&quot;Bb3&quot;</span><span class="p">:</span><span class="mi">233</span><span class="p">,</span> <span class="s2">&quot;B3&quot;</span><span class="p">:</span><span class="mi">247</span><span class="p">,</span> <span class="s2">&quot;C4&quot;</span><span class="p">:</span><span class="mi">262</span><span class="p">,</span> <span class="s2">&quot;C#4&quot;</span><span class="p">:</span><span class="mi">277</span><span class="p">,</span> <span class="s2">&quot;Db4&quot;</span><span class="p">:</span><span class="mi">277</span><span class="p">,</span> <span class="s2">&quot;D4&quot;</span><span class="p">:</span><span class="mi">294</span><span class="p">,</span>
+                   <span class="s2">&quot;D#4&quot;</span><span class="p">:</span><span class="mi">311</span><span class="p">,</span> <span class="s2">&quot;Eb4&quot;</span><span class="p">:</span><span class="mi">311</span><span class="p">,</span> <span class="s2">&quot;E4&quot;</span><span class="p">:</span><span class="mi">330</span><span class="p">,</span> <span class="s2">&quot;F4&quot;</span><span class="p">:</span><span class="mi">349</span><span class="p">,</span> <span class="s2">&quot;F#4&quot;</span><span class="p">:</span><span class="mi">370</span><span class="p">,</span> <span class="s2">&quot;Gb4&quot;</span><span class="p">:</span><span class="mi">370</span><span class="p">,</span> <span class="s2">&quot;G4&quot;</span><span class="p">:</span><span class="mi">392</span><span class="p">,</span>
+                   <span class="s2">&quot;G#4&quot;</span><span class="p">:</span><span class="mi">415</span><span class="p">,</span> <span class="s2">&quot;Ab4&quot;</span><span class="p">:</span><span class="mi">415</span><span class="p">,</span> <span class="s2">&quot;A4&quot;</span><span class="p">:</span><span class="mi">440</span><span class="p">,</span> <span class="s2">&quot;A#4&quot;</span><span class="p">:</span><span class="mi">466</span><span class="p">,</span> <span class="s2">&quot;Bb4&quot;</span><span class="p">:</span><span class="mi">466</span><span class="p">,</span> <span class="s2">&quot;B4&quot;</span><span class="p">:</span> <span class="mi">494</span><span class="p">,</span> <span class="s2">&quot;C5&quot;</span><span class="p">:</span><span class="mi">523</span><span class="p">,</span>
+                   <span class="s2">&quot;C#5&quot;</span><span class="p">:</span><span class="mi">554</span><span class="p">,</span> <span class="s2">&quot;Db5&quot;</span><span class="p">:</span><span class="mi">554</span><span class="p">,</span> <span class="s2">&quot;D5&quot;</span><span class="p">:</span><span class="mi">587</span><span class="p">,</span> <span class="s2">&quot;D#5&quot;</span><span class="p">:</span><span class="mi">622</span><span class="p">,</span> <span class="s2">&quot;Eb5&quot;</span><span class="p">:</span><span class="mi">622</span><span class="p">,</span> <span class="s2">&quot;E5&quot;</span><span class="p">:</span><span class="mi">659</span><span class="p">,</span> <span class="s2">&quot;F5&quot;</span><span class="p">:</span><span class="mi">699</span><span class="p">,</span>
+                   <span class="s2">&quot;F#5&quot;</span><span class="p">:</span><span class="mi">740</span><span class="p">,</span> <span class="s2">&quot;Gb5&quot;</span><span class="p">:</span><span class="mi">740</span><span class="p">,</span> <span class="s2">&quot;G5&quot;</span><span class="p">:</span><span class="mi">784</span><span class="p">,</span> <span class="s2">&quot;G#5&quot;</span><span class="p">:</span><span class="mi">831</span><span class="p">,</span> <span class="s2">&quot;Ab5&quot;</span><span class="p">:</span><span class="mi">831</span><span class="p">,</span> <span class="s2">&quot;A5&quot;</span><span class="p">:</span><span class="mi">880</span><span class="p">,</span> <span class="s2">&quot;A#5&quot;</span><span class="p">:</span><span class="mi">932</span><span class="p">,</span>
+                   <span class="s2">&quot;Bb5&quot;</span><span class="p">:</span><span class="mi">932</span><span class="p">,</span> <span class="s2">&quot;B5&quot;</span><span class="p">:</span><span class="mi">988</span><span class="p">,</span> <span class="s2">&quot;C6&quot;</span><span class="p">:</span><span class="mi">1047</span><span class="p">,</span> <span class="s2">&quot;C#6&quot;</span><span class="p">:</span><span class="mi">1109</span><span class="p">,</span> <span class="s2">&quot;Db6&quot;</span><span class="p">:</span><span class="mi">1109</span><span class="p">,</span> <span class="s2">&quot;D6&quot;</span><span class="p">:</span><span class="mi">1175</span><span class="p">,</span> <span class="s2">&quot;D#6&quot;</span><span class="p">:</span><span class="mi">1245</span><span class="p">,</span>
+                   <span class="s2">&quot;Eb6&quot;</span><span class="p">:</span><span class="mi">1245</span><span class="p">,</span> <span class="s2">&quot;E6&quot;</span><span class="p">:</span><span class="mi">1319</span><span class="p">,</span> <span class="s2">&quot;F6&quot;</span><span class="p">:</span><span class="mi">1397</span><span class="p">,</span> <span class="s2">&quot;F#6&quot;</span><span class="p">:</span><span class="mi">1480</span><span class="p">,</span> <span class="s2">&quot;Gb6&quot;</span><span class="p">:</span><span class="mi">1480</span><span class="p">,</span> <span class="s2">&quot;G6&quot;</span><span class="p">:</span><span class="mi">1568</span><span class="p">,</span> <span class="s2">&quot;G#6&quot;</span><span class="p">:</span><span class="mi">1661</span><span class="p">,</span>
+                   <span class="s2">&quot;Ab6&quot;</span><span class="p">:</span><span class="mi">1664</span><span class="p">,</span> <span class="s2">&quot;A6&quot;</span><span class="p">:</span><span class="mi">1760</span><span class="p">,</span> <span class="s2">&quot;A#6&quot;</span><span class="p">:</span><span class="mi">1865</span><span class="p">,</span> <span class="s2">&quot;Bb6&quot;</span><span class="p">:</span><span class="mi">1865</span><span class="p">,</span> <span class="s2">&quot;B6&quot;</span><span class="p">:</span><span class="mi">1976</span><span class="p">,</span> <span class="s2">&quot;C7&quot;</span><span class="p">:</span><span class="mi">2093</span><span class="p">,</span> <span class="s2">&quot;C#7&quot;</span><span class="p">:</span><span class="mi">2217</span><span class="p">,</span>
+                   <span class="s2">&quot;Db7&quot;</span><span class="p">:</span><span class="mi">2217</span><span class="p">,</span> <span class="s2">&quot;D7&quot;</span><span class="p">:</span><span class="mi">2349</span><span class="p">,</span> <span class="s2">&quot;D#7&quot;</span><span class="p">:</span><span class="mi">2489</span><span class="p">,</span> <span class="s2">&quot;Eb7&quot;</span><span class="p">:</span><span class="mi">2489</span><span class="p">,</span> <span class="s2">&quot;E7&quot;</span><span class="p">:</span><span class="mi">2637</span><span class="p">,</span> <span class="s2">&quot;F7&quot;</span><span class="p">:</span><span class="mi">2794</span><span class="p">,</span> <span class="s2">&quot;F#7&quot;</span><span class="p">:</span><span class="mi">2960</span><span class="p">,</span>
+                   <span class="s2">&quot;Gb7&quot;</span><span class="p">:</span><span class="mi">2960</span><span class="p">,</span> <span class="s2">&quot;G7&quot;</span><span class="p">:</span><span class="mi">3136</span><span class="p">,</span> <span class="s2">&quot;G#7&quot;</span><span class="p">:</span><span class="mi">3322</span><span class="p">,</span> <span class="s2">&quot;Ab7&quot;</span><span class="p">:</span><span class="mi">3322</span><span class="p">,</span> <span class="s2">&quot;A7&quot;</span><span class="p">:</span><span class="mi">3520</span><span class="p">,</span> <span class="s2">&quot;A#7&quot;</span><span class="p">:</span><span class="mi">3729</span><span class="p">,</span> <span class="s2">&quot;Bb7&quot;</span><span class="p">:</span><span class="mi">3729</span><span class="p">,</span>
+                   <span class="s2">&quot;B7&quot;</span><span class="p">:</span><span class="mi">3951</span><span class="p">,</span> <span class="s2">&quot;C8&quot;</span><span class="p">:</span><span class="mi">4186</span><span class="p">,</span> <span class="s2">&quot;C#8&quot;</span><span class="p">:</span><span class="mi">4435</span><span class="p">,</span> <span class="s2">&quot;Db8&quot;</span><span class="p">:</span><span class="mi">4435</span><span class="p">,</span> <span class="s2">&quot;D8&quot;</span><span class="p">:</span><span class="mi">4699</span><span class="p">,</span> <span class="s2">&quot;D#8&quot;</span><span class="p">:</span><span class="mi">4978</span><span class="p">,</span> <span class="s2">&quot;Eb8&quot;</span><span class="p">:</span><span class="mi">4978</span><span class="p">,</span>
+                   <span class="s2">&quot;E8&quot;</span><span class="p">:</span><span class="mi">5274</span><span class="p">,</span> <span class="s2">&quot;F8&quot;</span><span class="p">:</span><span class="mi">5588</span><span class="p">,</span> <span class="s2">&quot;F#8&quot;</span><span class="p">:</span><span class="mi">5920</span><span class="p">,</span> <span class="s2">&quot;Gb8&quot;</span><span class="p">:</span><span class="mi">5920</span><span class="p">,</span> <span class="s2">&quot;G8&quot;</span><span class="p">:</span><span class="mi">6272</span><span class="p">,</span> <span class="s2">&quot;G#8&quot;</span><span class="p">:</span><span class="mi">6645</span><span class="p">,</span> <span class="s2">&quot;Ab8&quot;</span><span class="p">:</span><span class="mi">6645</span><span class="p">,</span>
+                   <span class="s2">&quot;A8&quot;</span><span class="p">:</span><span class="mi">7040</span><span class="p">,</span> <span class="s2">&quot;A#8&quot;</span><span class="p">:</span><span class="mi">7459</span><span class="p">,</span> <span class="s2">&quot;B8&quot;</span><span class="p">:</span><span class="mi">7902</span><span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;A dictionary mapping musical note names (e.g., &quot;A4&quot;) to frequencies (in Hz).&quot;&quot;&quot;</span>
+
+
+
+<div class="viewcode-block" id="generate_music_note">
+<a class="viewcode-back" href="../api.html#cs101audio.generate_music_note">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_music_note</span><span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">wavetype</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span> <span class="c1">#MAKE THIS ANOTHER CONSTRUCTOR?? ASK CLIENT</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a single musical note as a new Audio object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        note (str): The note to generate (e.g., &quot;A4&quot;, &quot;C#5&quot;, &quot;Eb3&quot;).</span>
+<span class="sd">            Case-insensitive.</span>
+<span class="sd">        duration (int): The duration of the note in milliseconds.</span>
+<span class="sd">        wavetype (str): The type of wave (&quot;Sine&quot;, &quot;Square&quot;, &quot;Sawtooth&quot;,</span>
+<span class="sd">            or &quot;Triangle&quot;). Case-insensitive.</span>
+<span class="sd">        gain (int or float, optional): Gain to apply in decibels (dB).</span>
+<span class="sd">            Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Audio: A new Audio object containing the note.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the &#39;note&#39; or &#39;wavetype&#39; is invalid.</span>
+<span class="sd">        TypeError: If parameters are not of the correct type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_type</span><span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="s2">&quot;note&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">_check_type</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="n">_check_type</span><span class="p">(</span><span class="n">wavetype</span><span class="p">,</span> <span class="s2">&quot;wavetype&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">music_note_dict</span><span class="p">[</span><span class="n">note</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error! Invalid note </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">note</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> passed to generate_music_note&quot;</span><span class="p">)</span>
+
+    <span class="n">audio_result</span> <span class="o">=</span> <span class="n">Audio</span><span class="p">()</span>
+
+    <span class="n">audio_result</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">wavetype</span><span class="p">)</span>
+
+    <span class="n">audio_result</span><span class="o">.</span><span class="n">fade</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">audio_result</span><span class="o">.</span><span class="n">apply_gain</span><span class="p">(</span><span class="n">gain</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">audio_result</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Your Name.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
