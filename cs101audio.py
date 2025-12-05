@@ -230,7 +230,22 @@ class Audio():
         Plays the current audio segment, if it isn't empty.
         """
         if len(self._audioseg) > 0:
-            play(self._audioseg)
+            try:
+                import simpleaudiohamiltoncs
+                playback = simpleaudiohamiltoncs.play_buffer(
+                    self._audioseg.raw_data,
+                    num_channels=self._audioseg.channels,
+                    bytes_per_sample=self._audioseg.sample_width,
+                    sample_rate=self._audioseg.frame_rate
+                )
+                try:
+                    playback.wait_done()
+                except KeyboardInterrupt:
+                    playback.stop()
+            except ImportError:
+                pass
+            else:
+                return
             
 
     def __add__(self, other_audio):
