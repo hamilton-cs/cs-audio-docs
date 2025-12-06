@@ -214,7 +214,17 @@ generate_music_note(note, duration, wavetype, gain=0)
 
 ## Documentation
 
-Full documentation is available in the docstrings of each class and method.
+```
+Full documentation is hosted at https://hamilton-cs.github.io/cs-audio-docs/
+```
+
+Documentation Build/Rebuild Instructions:
+1. Make desired changes to docstrings in **cs101audio.py** and/or **audio_viewer.py** according to Sphinx format guidelines – https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html.
+1. Navigate to the folder **docs-setup** in your terminal.
+2. Run **make clean** to remove any existing documentation files.
+3. Run **make html** to regenerate documentation files.
+4. Push changes to GitHub; this will automatically re-deploy the site through GitHub Pages.
+
 
 ## License
 
