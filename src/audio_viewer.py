@@ -179,6 +179,11 @@ class AudioViewer:
     def plot_waveform(self):
         """
         Plots the full audio waveform(s) (Amplitude vs. Time).
+
+        .. figure:: _static/dual_waveform_graphic.png
+           :width: 80%
+           :align: left
+           :alt: Example plot of an audio spectrogram
         """
         if self._dual_mode:
             # Dual mode: plot both waveforms overlaid

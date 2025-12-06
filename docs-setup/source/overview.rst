@@ -29,6 +29,7 @@ Quick Start
 Here's a simple example to get started::
 
     from cs101audio import *
+    from audio_viewer import *
     
     # Create and play a musical note
     note = generate_music_note('C4', 1000, 'Sine')

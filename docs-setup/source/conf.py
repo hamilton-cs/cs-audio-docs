@@ -5,77 +5,45 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../src'))
 
-project = 'CS101 Audio'
-copyright = '2025, Charles Beard & Lulu Ceccon'
-author = 'Charles Beard & Lulu Ceccon'
-release = '1.0'
+project = 'cs-audio-docs'
+copyright = '2025, Lulu Ceccon, Charles Beard'
+author = 'Lulu Ceccon, Charles Beard'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
-
 templates_path = ['_templates']
 exclude_patterns = []
-
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-html_static_path = ['_static']
+import sphinx_rtd_theme
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../..'))
-
-# -- Project information -----------------------------------------------------
-project = 'CS101 Audio'
-copyright = '2024, Your Name'
-author = 'Your Name'
-release = '1.0'
-
-# -- General configuration ---------------------------------------------------
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.intersphinx',
+    # ... other extensions if you have them ...
+    "sphinx_rtd_theme",
+    'sphinx.ext.autodoc'
 ]
 
-# Mock imports for dependencies that might not be available or cause issues
+html_theme = "sphinx_rtd_theme"
+
 autodoc_mock_imports = [
-    'pydub',
-    'numpy',
-    'matplotlib',
-    'tkinter',
-    'pyaudioop',
-    'audioop'
+    "simpleaudio",
+    "pyaudio",
+    "pydub",
+    "pyaudioop",
+    "numpy",
+    "wave",
+    "matplotlib",
+    "matplotlib.pyplot",
+    "scipy"
+    # Add any other library cs101audio uses that isn't standard python
 ]
 
-templates_path = ['_templates']
-exclude_patterns = []
-
-# -- Options for HTML output -------------------------------------------------
-html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
-# -- Extension configuration -------------------------------------------------
-
-# Napoleon settings for docstring parsing
-napoleon_google_style = True
-napoleon_numpy_style = False
-napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
-
-# Autodoc settings
-autodoc_member_order = 'bysource'
-autodoc_typehints = 'description'
-
-# Intersphinx mapping
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-}

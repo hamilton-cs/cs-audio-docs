@@ -14,12 +14,11 @@ help:
 
 .PHONY: help Makefile
 
-# Custom HTML target that builds directly into the repo root
 html:
-	@echo "Building HTML into ../html (repo root)..."
+	@echo "Building HTML into ../docs (repo root)..."
 	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "../docs" $(SPHINXOPTS)
 	@touch ../docs/.nojekyll
-	@echo "Build finished. The HTML pages are in ../html"
+	@echo "Build finished. The HTML pages are in ../docs"
 
 # Clean target that removes the generated files in the repo root
 clean:

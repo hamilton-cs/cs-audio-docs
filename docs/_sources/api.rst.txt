@@ -12,15 +12,7 @@ Audio Class
 AudioViewer Class
 -----------------
 
-.. autoclass:: cs101audio.AudioViewer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-DualAudioViewer Class
----------------------
-
-.. autoclass:: cs101audio.DualAudioViewer
+.. autoclass:: audio_viewer.AudioViewer
    :members:
    :undoc-members:
    :show-inheritance:
