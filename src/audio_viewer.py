@@ -1,4 +1,29 @@
 """
+Copyright (c) 2025 hamilton-cs
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Author: Lulu Ceccon and Charles Beard
+Last Modified: 12/07/25
+
 AudioViewer module for CS101 Audio library.
 
 This module provides GUI visualization capabilities for Audio objects.
@@ -98,9 +123,6 @@ class AudioViewer:
             self.entry_end.grid(row=0, column=4)
             
             tk.Button(controls, text="Zoom Waveform", command=self.plot_zoom).grid(row=0, column=5, padx=10)
-            
-            # Legend/Color Key Display
-            tk.Label(controls, fg="darkblue", font=('Arial', 10, 'bold')).grid(row=1, columnspan=6, pady=5)
         else:
             # Single mode controls
             tk.Button(controls, text="Waveform", command=self.plot_waveform).grid(row=0, column=0, padx=5)
@@ -127,11 +149,15 @@ class AudioViewer:
         """
         # Check if the _cbar attribute exists AND is not None
         if hasattr(self, '_cbar') and self._cbar is not None:
-            # Look into clearing the entire screen
-            # Recreate the Axes: This is the critical step.
+            # Remove all axes from the figure to ensure clean state
+            for ax in self._fig.axes:
+                ax.remove()
+            
+            # Recreate the main Axes: This ensures a clean plot area
             self._ax = self._fig.add_subplot(AudioViewer.FULL_PLOT_POSITION)
+            
             # Nullify the reference: Tells the class the cbar is gone.
-            self._cbar = None 
+            self._cbar = None
 
     def plot(self, y, x, title):
         """
