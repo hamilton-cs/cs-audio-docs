@@ -2,10 +2,10 @@
 Demo tasks for CS 101 audio library
 """
 
-# Allow importing cs101audio from parent directory, as this file is in subdirectory
+# Allow importing cs101audio from src directory in parent folder
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cs101audio import *
 
