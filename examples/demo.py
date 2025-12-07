@@ -55,7 +55,7 @@ def fade():
     - The printed 'Pitch' (frequency) values before and after the fade will be identical.
     """
     sine = Audio()
-    sine.from_generator(220, 2000, "sine")
+    sine.from_generator(220, 3000, "sine")
     sine.fade(1000, 1000)
     print(f"Pitch before fade: {sine.pitch_at_time(1)}")
 
@@ -90,21 +90,20 @@ def normalize_crescendo():
     sine.play()
     sine.view()
 
-def clip_amplitude(peak):
+def clip_amplitude(audio, peak):
     """
     Demonstrates manual digital clipping (distortion) by limiting the maximum 
     amplitude of every sample in the audio segment.
 
     Arguments:
+    audio -- The Audio object to clip (Audio)
     peak -- The maximum absolute amplitude value allowed for any sample (int)
 
     Expected Observation:
     - The resulting audio will sound distorted or "fuzzy" due to digital clipping.
     - The waveform plot will show flat lines at the top and bottom (the 'clipped' samples).
     """
-    three_note = Audio()
-    three_note.open_audio_file("sample.wav")
-    samples = three_note.get_sample_list()
+    samples = audio.get_sample_list()
 
     for i in range(len(samples)):
         if samples[i] > peak:
@@ -116,9 +115,10 @@ def clip_amplitude(peak):
     for i in range(len(samples)):
         samples[i] = max(min(samples[i], peak), -peak)
 
-    three_note.from_sample_list(samples)
-    three_note.play()
-    three_note.view()
+    audio.from_sample_list(samples)
+    audio.play()
+    audio.view()
+    return audio
 
 def chord():
     """
@@ -172,20 +172,93 @@ def silence_every_n(audio, n):
     audio.from_sample_list(samples)
 
 def main():
-    compare_waves()
-    speed_affects_freq(4)
-    fade()
-    # normalize_crescendo()
-    # clip_amplitude(20000)
-    # chord()
-
-    sine = Audio()
-    sine.from_generator(220, 2000, "sine")
-    # sine.apply_gain(9)
-    # sine.decrescendo(start_time="HI", end_time=2000)
-    # print(sine.get_amplitude_at(1001))
-    # sine.play()
-    # sine.view()
+    # Get available functions
+    available_functions = {
+        '1': ('compare_waves', compare_waves, []),
+        '2': ('speed_affects_freq', speed_affects_freq, ['factor']),
+        '3': ('fade', fade, []),
+        '4': ('normalize_crescendo', normalize_crescendo, []),
+        '5': ('clip_amplitude', clip_amplitude, ['peak', 'audio']),
+        '6': ('chord', chord, [])
+    }
+    
+    # Show menu
+    print("\nAvailable demo functions:")
+    for key, (name, func, params) in available_functions.items():
+        # Show params but exclude 'audio' from display (it's handled separately)
+        display_params = [p for p in params if p != 'audio']
+        param_str = f" (needs: {', '.join(display_params)})" if display_params else ""
+        print(f"  {key}. {name}{param_str}")
+    
+    # Get user choice
+    choice = input("\nEnter function number (or name): ").strip()
+    
+    # Try to find by number or name
+    if choice in available_functions:
+        name, func, params = available_functions[choice]
+    else:
+        # Try to find by name
+        found = None
+        for key, (name, func, params) in available_functions.items():
+            if name == choice:
+                found = (name, func, params)
+                break
+        if not found:
+            print(f"Unknown function: {choice}")
+            return
+        name, func, params = found
+    
+    # Handle audio source if function needs it
+    args = []
+    if 'audio' in params:
+        print("\nAudio source:")
+        print("  1. Load sample.wav (default)")
+        print("  2. Load custom file")
+        print("  3. Generate sine wave")
+        audio_choice = input("Enter choice (1-3, default 1): ").strip()
+        
+        audio = Audio()
+        if audio_choice == '2':
+            filename = input("Enter audio filename: ").strip()
+            try:
+                audio.open_audio_file(filename)
+                print(f"Loaded: {filename}")
+            except FileNotFoundError:
+                print(f"File not found: {filename}. Using sample.wav or default.")
+                try:
+                    audio.open_audio_file("sample.wav")
+                except FileNotFoundError:
+                    print("sample.wav not found. Using generated sine wave.")
+                    audio.from_generator(220, 3000, "sine")
+        elif audio_choice == '3':
+            freq = input("Enter frequency in Hz (default 220): ").strip()
+            duration = input("Enter duration in ms (default 3000): ").strip()
+            audio.from_generator(int(freq) if freq else 220, 
+                                int(duration) if duration else 3000, "sine")
+            print(f"Generated sine wave: {int(freq) if freq else 220} Hz, {int(duration) if duration else 3000} ms")
+        else:
+            # Default: try sample.wav, fallback to generated if not found
+            try:
+                audio.open_audio_file("sample.wav")
+                print("Loaded: sample.wav")
+            except FileNotFoundError:
+                print("sample.wav not found. Using generated sine wave.")
+                audio.from_generator(220, 3000, "sine")
+        
+        # Insert audio as first argument
+        args.insert(0, audio)
+    
+    # Get other parameters if needed
+    if 'factor' in params:
+        factor = input("Enter speed factor (default 4.0): ").strip()
+        args.append(float(factor) if factor else 4.0)
+    elif 'peak' in params:
+        peak = input("Enter peak amplitude (default 32767): ").strip()
+        args.append(int(peak) if peak else 32767)
+    
+    # Run the function
+    print(f"\nRunning {name}...")
+    func(*args)
 
 if __name__ == "__main__":
     main()

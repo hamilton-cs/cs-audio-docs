@@ -176,34 +176,106 @@ def replicate_plot(audio, duration):
     return audio
 
 def main():
-    sine = Audio()
-    sine.from_generator(220, 3000, "sine")
-    # sine = clip_amplitude(sine, 1000)
-    # sine = silence_every_n_sample(sine, 5)
-    # sine = mute_chunk(sine, 1000, 2000)
-    # sine = plot_to_replicate(sine)
-    # sine.play()
-    # sine.view()
-
-    # replicated = Audio()
-    # replicated.from_generator(220, 3000, "sine")
-    # replicated = replicate_plot(replicated, 1000)
-    # replicated.play()
-    # replicated.view()
-
-    three_note = Audio()
-    three_note.open_audio_file("sample.wav")
-    three_note.play()
-    three_note = reverse(three_note)
-    three_note.play()
-
-    # three_note = echo(three_note)
-    # three_note = adjust_amplitude_additively(three_note, 1000)
-    # three_note = normalize(three_note, 10000)
-
-    # three_note.play()
-    # three_note.view()
-
+    # Get available functions with their parameters
+    available_functions = {
+        '1': ('clip_amplitude', clip_amplitude, ['peak']),
+        '2': ('silence_every_n_sample', silence_every_n_sample, ['n']),
+        '3': ('adjust_amplitude_additively', adjust_amplitude_additively, ['amount']),
+        '4': ('mute_chunk', mute_chunk, ['start_time', 'end_time']),
+        '5': ('reverse', reverse, []),
+        '6': ('echo', echo, ['delay', 'decay']),
+        '7': ('normalize', normalize, ['max_amp']),
+        '8': ('plot_to_replicate', plot_to_replicate, []),
+        '9': ('replicate_plot', replicate_plot, ['duration'])
+    }
+    
+    # Show menu
+    print("\nAvailable task functions:")
+    for key, (name, func, params) in available_functions.items():
+        param_str = f" (needs: {', '.join(params)})" if params else ""
+        print(f"  {key}. {name}{param_str}")
+    
+    # Get user choice
+    choice = input("\nEnter function number (or name): ").strip()
+    
+    # Try to find by number or name
+    if choice in available_functions:
+        name, func, params = available_functions[choice]
+    else:
+        # Try to find by name
+        found = None
+        for key, (name, func, params) in available_functions.items():
+            if name == choice:
+                found = (name, func, params)
+                break
+        if not found:
+            print(f"Unknown function: {choice}")
+            return
+        name, func, params = found
+    
+    # Create or load audio
+    print("\nAudio source:")
+    print("  1. Generate sine wave (default)")
+    print("  2. Load from file")
+    audio_choice = input("Enter choice (1 or 2, default 1): ").strip()
+    
+    audio = Audio()
+    if audio_choice == '2':
+        filename = input("Enter audio filename: ").strip()
+        try:
+            audio.open_audio_file(filename)
+            print(f"Loaded: {filename}")
+        except FileNotFoundError:
+            print(f"File not found: {filename}. Using default sine wave.")
+            audio.from_generator(220, 3000, "sine")
+    else:
+        audio.from_generator(220, 3000, "sine")
+        print("Using default sine wave (220 Hz, 3 seconds)")
+    
+    # Get parameters if needed
+    args = []
+    if 'peak' in params:
+        peak = input("Enter peak amplitude (default 1000): ").strip()
+        args.append(int(peak) if peak else 1000)
+    elif 'n' in params:
+        n = input("Enter n value (default 5): ").strip()
+        args.append(int(n) if n else 5)
+    elif 'amount' in params:
+        amount = input("Enter amount (default 1000): ").strip()
+        args.append(int(amount) if amount else 1000)
+    elif 'start_time' in params:
+        start_time = input("Enter start time in ms (default 1000): ").strip()
+        args.append(int(start_time) if start_time else 1000)
+        end_time = input("Enter end time in ms (default 2000): ").strip()
+        args.append(int(end_time) if end_time else 2000)
+    elif 'delay' in params:
+        delay = input("Enter delay in samples (default 11000): ").strip()
+        args.append(int(delay) if delay else 11000)
+        decay = input("Enter decay factor (default 0.5): ").strip()
+        args.append(float(decay) if decay else 0.5)
+    elif 'max_amp' in params:
+        max_amp = input(f"Enter max amplitude (default {MAX_AMPLITUDE}): ").strip()
+        args.append(int(max_amp) if max_amp else MAX_AMPLITUDE)
+    elif 'duration' in params:
+        duration = input("Enter duration in ms (default 1000): ").strip()
+        args.append(int(duration) if duration else 1000)
+    
+    # Run the function
+    print(f"\nRunning {name}...")
+    audio = func(audio, *args)
+    
+    # Ask if user wants to play/view
+    print("\nWhat would you like to do with the result?")
+    print("  1. Play audio")
+    print("  2. View audio")
+    print("  3. Both")
+    print("  4. Nothing (just return)")
+    action = input("Enter choice (1-4, default 4): ").strip()
+    
+    if action == '1' or action == '3':
+        audio.play()
+    if action == '2' or action == '3':
+        audio.view()
 
 if __name__ == "__main__":
     main()
