@@ -20,7 +20,6 @@ warnings.filterwarnings("ignore", message="Couldn't find ffmpeg or avconv - defa
 warnings.filterwarnings("ignore", message="Couldn't find ffplay or avplay - defaulting to ffplay, but may not work")
 
 import numpy as np  # Used for FFT calculations in pitch_at_time method
-
 from audio_viewer import AudioViewer # Import AudioViewer
 
 def _check_type(param, param_name, target_type):
@@ -172,7 +171,7 @@ class Audio():
         Args:
             sample_lst (list[int]): The list of samples to generate the audio from.
             template (Audio, optional): An Audio object to use as a template
-                for metadata. Defaults to self.
+            for metadata. Defaults to self.
         """
         _check_type(sample_lst, "sample_lst", list)
         if template is not None:
@@ -200,12 +199,12 @@ class Audio():
             freq (int): The frequency of the wave to be generated (in Hz).
             duration (int): The duration of the wave (in milliseconds).
             wavetype (str): The type of wave ("Sine", "Square", "Sawtooth",
-                or "Triangle"). Case-insensitive.
+            or "Triangle"). Case-insensitive.
 
         Raises:
             ValueError: If an invalid 'wavetype' is provided.
             TypeError: If 'freq' or 'duration' are not ints, or 'wavetype'
-                is not a str.
+            is not a str.
         """
         _check_type(wavetype, "wavetype", str)
         _check_type(freq, "freq", int)
@@ -230,7 +229,22 @@ class Audio():
         Plays the current audio segment, if it isn't empty.
         """
         if len(self._audioseg) > 0:
-            play(self._audioseg)
+            try:
+                import simpleaudiohamiltoncs
+                playback = simpleaudiohamiltoncs.play_buffer(
+                    self._audioseg.raw_data,
+                    num_channels=self._audioseg.channels,
+                    bytes_per_sample=self._audioseg.sample_width,
+                    sample_rate=self._audioseg.frame_rate
+                )
+                try:
+                    playback.wait_done()
+                except KeyboardInterrupt:
+                    playback.stop()
+            except ImportError:
+                pass
+            else:
+                return
             
 
     def __add__(self, other_audio):
@@ -333,9 +347,9 @@ class Audio():
         Args:
             audio2 (Audio): The audio object to overlay.
             position (int, optional): The time in milliseconds at which to
-                start the overlay. Defaults to 0.
+            start the overlay. Defaults to 0.
             loop (bool, optional): If True, loops 'audio2' to fill the
-                duration of this audio. Defaults to False.
+            duration of this audio. Defaults to False.
         """
         _check_type(audio2, "audio2", Audio)
         _check_type(position, "position", int)
@@ -404,7 +418,7 @@ class Audio():
 
         Args:
             factor (int or float): The speed multiplier.
-                (e.g., 2.0 is 2x speed, 0.5 is half speed).
+            (e.g., 2.0 is 2x speed, 0.5 is half speed).
 
         Raises:
             TypeError: If 'factor' is not an int or float.
@@ -538,7 +552,7 @@ class Audio():
         Args:
             time (float): The time (in miliseconds) to analyze.
             window (float, optional): The size of the analysis window
-                (in miliseconds). Defaults to 50 milliseconds
+            (in miliseconds). Defaults to 50 milliseconds
 
         Returns:
             float: The estimated dominant frequency in Hz.
@@ -806,6 +820,7 @@ class Audio():
         Raises:
             TypeError: If 'other' is not an Audio object.
         """
+        
         _check_type(other, "other", Audio)
         AudioViewer(self, other)
 
@@ -844,12 +859,12 @@ def generate_music_note(note, duration, wavetype, gain=0): #MAKE THIS ANOTHER CO
 
     Args:
         note (str): The note to generate (e.g., "A4", "C#5", "Eb3").
-            Case-insensitive.
+        Case-insensitive.
         duration (int): The duration of the note in milliseconds.
         wavetype (str): The type of wave ("Sine", "Square", "Sawtooth",
-            or "Triangle"). Case-insensitive.
+        or "Triangle"). Case-insensitive.
         gain (int or float, optional): Gain to apply in decibels (dB).
-            Defaults to 0.
+        Defaults to 0.
 
     Returns:
         Audio: A new Audio object containing the note.
