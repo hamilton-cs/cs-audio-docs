@@ -196,22 +196,14 @@ def main():
         print(f"  {key}. {name}{param_str}")
     
     # Get user choice
-    choice = input("\nEnter function number (or name): ").strip()
+    choice = input("\nEnter function number: ").strip()
     
-    # Try to find by number or name
-    if choice in available_functions:
-        name, func, params = available_functions[choice]
-    else:
-        # Try to find by name
-        found = None
-        for key, (name, func, params) in available_functions.items():
-            if name == choice:
-                found = (name, func, params)
-                break
-        if not found:
-            print(f"Unknown function: {choice}")
-            return
-        name, func, params = found
+    # Find function by number
+    if choice not in available_functions:
+        print(f"Invalid function number: {choice}")
+        return
+    
+    name, func, params = available_functions[choice]
     
     # Create or load audio
     print("\nAudio source:")
@@ -221,7 +213,7 @@ def main():
     
     audio = Audio()
     if audio_choice == '2':
-        filename = input("Enter audio filename: ").strip()
+        filename = input("Enter audio filename (include path if not in current directory): ").strip()
         try:
             audio.open_audio_file(filename)
             print(f"Loaded: {filename}")

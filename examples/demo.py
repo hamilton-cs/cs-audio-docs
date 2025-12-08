@@ -3,11 +3,16 @@ Demo usage/tasks for CS 101 audio library
 """
 
 # Allow importing cs101audio from src directory in parent folder
+from errno import EILSEQ
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cs101audio import *
+
+# Constants for 16-bit audio (signed short integer)
+MAX_AMPLITUDE = 32767
+MIN_AMPLITUDE = -32768
 
 def compare_waves():
     """
@@ -191,59 +196,38 @@ def main():
         print(f"  {key}. {name}{param_str}")
     
     # Get user choice
-    choice = input("\nEnter function number (or name): ").strip()
+    choice = input("\nEnter function number: ").strip()
     
-    # Try to find by number or name
-    if choice in available_functions:
-        name, func, params = available_functions[choice]
-    else:
-        # Try to find by name
-        found = None
-        for key, (name, func, params) in available_functions.items():
-            if name == choice:
-                found = (name, func, params)
-                break
-        if not found:
-            print(f"Unknown function: {choice}")
-            return
-        name, func, params = found
+    # Find function by number
+    if choice not in available_functions:
+        print(f"Invalid function number: {choice}")
+        return
+    
+    name, func, params = available_functions[choice]
     
     # Handle audio source if function needs it
     args = []
     if 'audio' in params:
         print("\nAudio source:")
-        print("  1. Load sample.wav (default)")
-        print("  2. Load custom file")
-        print("  3. Generate sine wave")
-        audio_choice = input("Enter choice (1-3, default 1): ").strip()
+        print("  1. Load custom file")
+        print("  2. Generate sine wave")
+        audio_choice = input("Enter choice (1 or 2, default 1): ").strip()
         
         audio = Audio()
-        if audio_choice == '2':
-            filename = input("Enter audio filename: ").strip()
+        if audio_choice == '1':
+            filename = input("Enter audio filename (include path if not in current directory): ").strip()
             try:
                 audio.open_audio_file(filename)
                 print(f"Loaded: {filename}")
             except FileNotFoundError:
-                print(f"File not found: {filename}. Using sample.wav or default.")
-                try:
-                    audio.open_audio_file("sample.wav")
-                except FileNotFoundError:
-                    print("sample.wav not found. Using generated sine wave.")
-                    audio.from_generator(220, 3000, "sine")
-        elif audio_choice == '3':
+                print(f"File not found: {filename}. Using sine wave.")
+                audio.from_generator(220, 3000, "sine")
+        else:
             freq = input("Enter frequency in Hz (default 220): ").strip()
             duration = input("Enter duration in ms (default 3000): ").strip()
             audio.from_generator(int(freq) if freq else 220, 
                                 int(duration) if duration else 3000, "sine")
             print(f"Generated sine wave: {int(freq) if freq else 220} Hz, {int(duration) if duration else 3000} ms")
-        else:
-            # Default: try sample.wav, fallback to generated if not found
-            try:
-                audio.open_audio_file("sample.wav")
-                print("Loaded: sample.wav")
-            except FileNotFoundError:
-                print("sample.wav not found. Using generated sine wave.")
-                audio.from_generator(220, 3000, "sine")
         
         # Insert audio as first argument
         args.insert(0, audio)
@@ -253,8 +237,8 @@ def main():
         factor = input("Enter speed factor (default 4.0): ").strip()
         args.append(float(factor) if factor else 4.0)
     elif 'peak' in params:
-        peak = input("Enter peak amplitude (default 32767): ").strip()
-        args.append(int(peak) if peak else 32767)
+        peak = input(f"Enter peak amplitude (default {MAX_AMPLITUDE}): ").strip()
+        args.append(int(peak) if peak else MAX_AMPLITUDE)
     
     # Run the function
     print(f"\nRunning {name}...")
