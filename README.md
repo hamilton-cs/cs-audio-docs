@@ -283,6 +283,22 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2025 hamilton-cs
 
-## Contributing
+## Contributors
 
-This library is designed for educational use in computer science courses. For issues, questions, or contributions, please refer to the repository's issue tracker.
+### Core Library (`src/cs101audio.py`)
+- Jack Feser
+- Gwen Urbanczyk
+- Matthew Dioguardi
+- Madison LaPoint
+- Mark Bailey
+- Sarah Morrison-Smith
+- Lulu Ceccon
+- Charles Beard
+
+### Audio Viewer (`src/audio_viewer.py`)
+- Lulu Ceccon
+- Charles Beard
+
+### Examples (`examples/`)
+- Lulu Ceccon
+- Charles Beard
