@@ -148,6 +148,12 @@ The viewer provides:
 - Spectrogram
 - Peak amplitude information
 
+**Dual Audio Viewer** (when using `view_with()`):
+- Overlaid waveform display showing both audio files simultaneously
+- Blue line represents the first audio, red line represents the second audio
+- Zoom functionality to compare specific time ranges
+- Full waveform view to see both audios over their entire duration
+
 ## Examples
 
 The repository includes two interactive example files in the `examples/` directory:
@@ -286,9 +292,7 @@ generate_music_note(note, duration, wavetype, gain=0)
 
 ## Documentation
 
-```
-Full documentation is hosted at https://hamilton-cs.github.io/cs-audio-docs/
-```
+Full documentation is hosted at [https://hamilton-cs.github.io/cs-audio-docs/](https://hamilton-cs.github.io/cs-audio-docs/)
 
 Documentation Build/Rebuild Instructions:
 1. Make desired changes to docstrings in `cs101audio.py` and/or `audio_viewer.py` according to Sphinx format guidelines – https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html.
