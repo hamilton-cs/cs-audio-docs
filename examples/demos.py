@@ -1,5 +1,11 @@
 """
 Demo usage/tasks for CS 101 audio library
+
+Contributors:
+- Lulu Ceccon
+- Charles Beard
+Institution: Hamilton College Computer Science Department
+Last Modified: 12/08/25
 """
 
 # Allow importing cs101audio from src directory in parent folder

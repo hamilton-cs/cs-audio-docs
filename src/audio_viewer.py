@@ -12,6 +12,11 @@ Last Modified: 12/08/25
 AudioViewer module for CS101 Audio library.
 
 This module provides GUI visualization capabilities for Audio objects.
+
+AI Assistance: The tkinter GUI template, matplotlib canvas integration, and
+initial class structure were created with assistance from ChatGPT (OpenAI, 2025).
+Enhancements including dual audio viewer functionality, spectrogram
+features, and bug fixes were developed by the contributors.
 """
 
 # Imports for GUI plots

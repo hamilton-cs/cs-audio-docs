@@ -1,5 +1,11 @@
 """
 Demo tasks for CS 101 audio library
+
+Contributors:
+- Lulu Ceccon
+- Charles Beard
+Institution: Hamilton College Computer Science Department
+Last Modified: 12/08/25
 """
 
 # Allow importing cs101audio from src directory in parent folder
@@ -175,6 +181,13 @@ def replicate_plot(audio, duration):
     return audio
 
 def main():
+    """
+    Interactive menu system for running task functions.
+    
+    Note: The interactive menu structure, parameter handling, and user input
+    flow were developed with assistance from ChatGPT (OpenAI, 2025).
+    """
+
     # Get available functions with their parameters
     available_functions = {
         '1': ('clip_amplitude', clip_amplitude, ['peak']),

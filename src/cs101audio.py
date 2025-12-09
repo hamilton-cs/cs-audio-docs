@@ -38,6 +38,7 @@ warnings.filterwarnings("ignore", message="Couldn't find ffplay or avplay - defa
 import numpy as np  # Used for FFT calculations in pitch_at_time method
 from audio_viewer import AudioViewer # Import AudioViewer
 
+# AI Assistance: Tuple type checking support added with assistance from ChatGPT (OpenAI, 2025).
 def _check_type(param, param_name, target_type):
     """
     Checks if a parameter is of the correct type and raises a TypeError if not.
@@ -453,7 +454,7 @@ class Audio():
         
         self._audioseg = sound_with_altered_frame_rate.set_frame_rate(self._audioseg.frame_rate)
 
-    def normalize(self, max_amplitude=MAX_AMPLITUDE):
+    def normalize(self, max_amplitude=None):
         """
         Normalizes the audio to a specific peak amplitude.
 
@@ -471,9 +472,12 @@ class Audio():
             ValueError: If 'max_amplitude' is negative or > MAX_AMPLITUDE.
             ZeroDivisionError: If the audio is completely silent (all samples are 0).
         """
+        if max_amplitude is None:
+            max_amplitude = Audio.MAX_AMPLITUDE
+
         _check_type(max_amplitude, "max_amplitude", int)
         if max_amplitude > Audio.MAX_AMPLITUDE:
-            raise ValueError(f"Max amplitude cannot exceed 32,767. Got {max_amplitude}.")
+            raise ValueError(f"Max amplitude cannot exceed {Audio.MAX_AMPLITUDE}. Got {max_amplitude}.")
         elif max_amplitude < 0:
             raise ValueError(f"Max amplitude must be positive. Got {max_amplitude}.")
         
@@ -558,6 +562,7 @@ class Audio():
 
         return avg_amp
 
+    # AI Assistance: The function outline was developed with assistance from ChatGPT (OpenAI, 2025).
     def pitch_at_time(self, time, window=50):
         """
         Estimates the dominant frequency (pitch) at a specific time.
