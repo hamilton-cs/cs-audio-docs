@@ -144,15 +144,19 @@ audio1.view_with(audio2)
 The viewer provides:
 - Full waveform display
 - Zoomed waveform views
+- Peak amplitude information
 - Frequency spectrum (FFT)
 - Spectrogram
-- Peak amplitude information
+
+![Spectrogram Example](docs/_images/spectrogram_graphic.png)
 
 **Dual Audio Viewer** (when using `view_with()`):
 - Overlaid waveform display showing both audio files simultaneously
 - Blue line represents the first audio, red line represents the second audio
 - Zoom functionality to compare specific time ranges
 - Full waveform view to see both audios over their entire duration
+
+![Dual Waveform Example](docs/_images/dual_waveform_graphic.png)
 
 ## Examples
 
