@@ -151,8 +151,7 @@ def plot_to_replicate(audio):
     '''
     Creates plot for student to view and replicate with thier own function.
     '''
-    audio.normalize(15000)
-    audio.crescendo()
+    audio.fade_in(3000)
     
     return audio
 
@@ -227,8 +226,8 @@ def main():
     # Get parameters if needed
     args = []
     if 'peak' in params:
-        peak = input("Enter peak amplitude (default 1000): ").strip()
-        args.append(int(peak) if peak else 1000)
+        peak = input("Enter peak amplitude (default 10000): ").strip()
+        args.append(int(peak) if peak else 10000)
     elif 'n' in params:
         n = input("Enter n value (default 5): ").strip()
         args.append(int(n) if n else 5)
@@ -246,8 +245,8 @@ def main():
         decay = input("Enter decay factor (default 0.5): ").strip()
         args.append(float(decay) if decay else 0.5)
     elif 'max_amp' in params:
-        max_amp = input(f"Enter max amplitude (default {MAX_AMPLITUDE}): ").strip()
-        args.append(int(max_amp) if max_amp else MAX_AMPLITUDE)
+        max_amp = input("Enter max amplitude (default 10000): ").strip()
+        args.append(int(max_amp) if max_amp else 10000)
     elif 'duration' in params:
         duration = input("Enter duration in ms (default 1000): ").strip()
         args.append(int(duration) if duration else 1000)

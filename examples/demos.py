@@ -24,11 +24,14 @@ def compare_waves():
     """
     sine = Audio()
     sine.from_generator(220, 2000, "sine")
-    # sine.play()
+    print("Playing sine wave...")
+    sine.play()
     square = Audio()
     square.from_generator(220, 1000, "square")
-    # square.play()
+    print("Playing square wave...")
+    square.play()
     sine.view_with(square)
+    
 
 def speed_affects_freq(factor):
     """
@@ -44,11 +47,13 @@ def speed_affects_freq(factor):
     """
     sine = Audio()
     sine.from_generator(220, 3000, "sine")
+    print("Playing original audio...")
     sine.play()
-    print(f"Pitch before chaning speed: {sine.pitch_at_time(0.5)}")
+    print(f"Pitch before changing speed: {sine.pitch_at_time(500):.2f}")
     sine.change_speed(factor)
+    print("Playing modified audio...")
     sine.play()
-    print(f"Pitch after changing speed: {sine.pitch_at_time(0.5)}")
+    print(f"Pitch after changing speed: {sine.pitch_at_time(500):.2f}")
 
 def fade():
     """
@@ -62,14 +67,16 @@ def fade():
     sine = Audio()
     sine.from_generator(220, 3000, "sine")
     sine.fade(1000, 1000)
-    print(f"Pitch before fade: {sine.pitch_at_time(1)}")
+    print(f"Pitch before fade: {sine.pitch_at_time(500)}")
 
-    # View the waveform
+    # Play the modified sine wave
     sine.play()
-    sine.view()
 
     # Observe how frequency does not change => amplitude does NOT affect frequency
-    print(f"Pitch after fade: {sine.pitch_at_time(1)}")
+    print(f"Pitch after fade: {sine.pitch_at_time(500)}")
+    
+    # View the waveform
+    sine.view()
 
 def normalize_crescendo():
     """
@@ -80,7 +87,8 @@ def normalize_crescendo():
     The second run normalizes the signal to a lower peak first, allowing the 
     crescendo to function correctly without distortion.
     """
-    # Without normalize (audio alraedy close to max amplitude)
+    # Without normalize (audio already close to max amplitude)
+    print("Part 1: Playing audio with crescendo and without normalization (will cause clipping)...")
     sine = Audio()
     sine.from_generator(220, 3000, "sine")
     sine.crescendo()
@@ -88,26 +96,40 @@ def normalize_crescendo():
     sine.view()
 
     # With normalization
+    print("\nPart 2: Playing audio with normalization and crescendo (no clipping)...")
     sine = Audio()
     sine.from_generator(220, 3000, "sine")
-    sine.normalize(15000)
-    sine.crescendo()
+    sine.normalize(5000)
+    sine.crescendo(final_multiplier=6)
     sine.play()
     sine.view()
 
-def clip_amplitude(audio, peak):
+def clip_amplitude(peak):
     """
     Demonstrates manual digital clipping (distortion) by limiting the maximum 
     amplitude of every sample in the audio segment.
+    
+    Automatically loads three_note.wav from the samples directory.
 
     Arguments:
-    audio -- The Audio object to clip (Audio)
     peak -- The maximum absolute amplitude value allowed for any sample (int)
 
     Expected Observation:
     - The resulting audio will sound distorted or "fuzzy" due to digital clipping.
     - The waveform plot will show flat lines at the top and bottom (the 'clipped' samples).
     """
+    audio = Audio()
+    try:
+        audio.open_audio_file("../samples/three_note.wav")
+        print("Loaded: ../samples/three_note.wav")
+    except FileNotFoundError:
+        try:
+            audio.open_audio_file("samples/three_note.wav")
+            print("Loaded: samples/three_note.wav")
+        except FileNotFoundError:
+            print("Error: Could not find three_note.wav. Please ensure it exists in the samples directory.")
+            return
+    
     samples = audio.get_sample_list()
 
     for i in range(len(samples)):
@@ -150,31 +172,9 @@ def chord():
 
     C4.overlay(E4)
     C4.overlay(G4)
+    print("Playing a C Major chord (C4, E4, G4)...")
     C4.play()
     C4.view()
-
-def silence_every_n(audio, n):
-    """
-    Silences every nth entry in the sample list by setting those samples to 0.
-    
-    Arguments:
-    audio -- The Audio object to modify (Audio)
-    n -- The interval at which to silence samples (int). Every nth sample 
-         (indices 0, n, 2n, 3n, ...) will be set to 0.
-    
-    Modifies the Audio object in-place.
-    
-    Expected Observation:
-    - The audio will have periodic silence points, creating a stuttering effect.
-    - The waveform plot will show zero-amplitude points at regular intervals.
-    """
-    samples = audio.get_sample_list()
-    
-    # Silence every nth sample (starting from index 0)
-    for i in range(0, len(samples), n):
-        samples[i] = 0
-    
-    audio.from_sample_list(samples)
 
 def main():
     # Get available functions
@@ -183,7 +183,7 @@ def main():
         '2': ('speed_affects_freq', speed_affects_freq, ['factor']),
         '3': ('fade', fade, []),
         '4': ('normalize_crescendo', normalize_crescendo, []),
-        '5': ('clip_amplitude', clip_amplitude, ['peak', 'audio']),
+        '5': ('clip_amplitude', clip_amplitude, ['peak']),
         '6': ('chord', chord, [])
     }
     
@@ -205,40 +205,14 @@ def main():
     
     name, func, params = available_functions[choice]
     
-    # Handle audio source if function needs it
+    # Get parameters if needed
     args = []
-    if 'audio' in params:
-        print("\nAudio source:")
-        print("  1. Load custom file")
-        print("  2. Generate sine wave")
-        audio_choice = input("Enter choice (1 or 2, default 1): ").strip()
-        
-        audio = Audio()
-        if audio_choice == '1':
-            filename = input("Enter audio filename (include path if not in current directory): ").strip()
-            try:
-                audio.open_audio_file(filename)
-                print(f"Loaded: {filename}")
-            except FileNotFoundError:
-                print(f"File not found: {filename}. Using sine wave.")
-                audio.from_generator(220, 3000, "sine")
-        else:
-            freq = input("Enter frequency in Hz (default 220): ").strip()
-            duration = input("Enter duration in ms (default 3000): ").strip()
-            audio.from_generator(int(freq) if freq else 220, 
-                                int(duration) if duration else 3000, "sine")
-            print(f"Generated sine wave: {int(freq) if freq else 220} Hz, {int(duration) if duration else 3000} ms")
-        
-        # Insert audio as first argument
-        args.insert(0, audio)
-    
-    # Get other parameters if needed
     if 'factor' in params:
         factor = input("Enter speed factor (default 4.0): ").strip()
         args.append(float(factor) if factor else 4.0)
     elif 'peak' in params:
-        peak = input(f"Enter peak amplitude (default {MAX_AMPLITUDE}): ").strip()
-        args.append(int(peak) if peak else MAX_AMPLITUDE)
+        peak = input(f"Enter peak amplitude (default {10000}): ").strip()
+        args.append(int(peak) if peak else 10000)
     
     # Run the function
     print(f"\nRunning {name}...")
