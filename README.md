@@ -319,7 +319,7 @@ Documentation Build/Rebuild Instructions:
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-Copyright (c) 2025 hamilton-cs
+Copyright (c) 2025 Jack Feser, Gwen Urbanczyk, Matthew Dioguardi, Madison LaPoint, Mark Bailey, Sarah Morrison-Smith, Lulu Ceccon, Charles Beard
 
 ## Contributors
 
