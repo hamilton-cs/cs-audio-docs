@@ -162,12 +162,6 @@ Interactive demonstrations of various library features. Run it to see examples o
 - Amplitude clipping
 - Chord generation
 
-**Usage:**
-```bash
-cd examples
-python demo.py
-```
-
 When you run `demos.py`, you'll see a menu of available demonstrations. Simply enter the number corresponding to the demo you want to run. Some demos allow you to:
 - Load audio from a file (provide the full path if not in the current directory)
 - Generate a sine wave with custom frequency and duration
@@ -185,19 +179,46 @@ Interactive exercises and tasks for learning audio manipulation. Includes implem
 - Normalization
 - Plot replication
 
-**Usage:**
-```bash
-cd examples
-python tasks.py
-```
-
 When you run `tasks.py`, you'll see a menu of available tasks. Enter the number of the task you want to run. For each task, you can:
 - Generate a default sine wave (220 Hz, 3 seconds)
 - Load an audio file from your system (provide the full path, e.g., `../samples/sample.wav` if using files from the `samples/` directory)
 - Provide task-specific parameters (e.g., peak amplitude, time ranges, delay values)
 - Choose to play, view, or both after the task completes
 
-**Note:** Both `demo.py` and `tasks.py` can work standalone - they automatically handle importing the library from the `src/` directory, so you can copy these files to your own projects and they will still work (just make sure the `src/` directory structure is maintained relative to the examples).
+### Running Examples
+
+The example files (`demos.py` and `tasks.py`) are designed to work with both Thonny and standard command-line execution.
+
+#### Using Thonny
+
+1. **Open Thonny** on your computer
+2. **Open the example file**:
+   - Go to `File → Open...`
+   - Navigate to the `examples/` directory in the repository
+   - Open `demos.py` or `tasks.py`
+3. **Run the file**:
+   - Click the green "Run" button
+   - The interactive menu will appear in the Thonny shell at the bottom
+4. **Follow the prompts** in the Thonny shell
+
+#### Using Command Line
+
+1. **Open a terminal** 
+2. **Navigate to the examples directory**:
+   ```bash
+   cd path/to/cs-audio-docs/examples
+   ```
+3. **Run the example**:
+   ```bash
+   python demos.py
+   # or
+   python tasks.py
+   ```
+4. **Follow the prompts** in the terminal
+
+**Note:** Make sure Python 3.x is installed and accessible from your command line. You may need to use `python3` instead of `python` on some systems.
+
+**Note:** Both `demos.py` and `tasks.py` can work standalone - they automatically handle importing the library from the `src/` directory, so you can copy these files to your own projects and they will still work (just make sure the `src/` directory structure is maintained relative to the examples).
 
 ## Project Structure
 
@@ -210,7 +231,7 @@ cs-audio-docs/
 │   ├── demo.py          # Interactive demonstrations
 │   └── tasks.py         # Interactive exercises and tasks
 ├── samples/             # Sample audio files (optional)
-│   ├── sample.wav
+│   ├── c.wav
 │   └── ...
 ├── docs/                # Generated documentation
 ├── docs-setup/          # Documentation source files
