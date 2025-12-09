@@ -148,7 +148,9 @@ The viewer provides:
 - Frequency spectrum (FFT)
 - Spectrogram
 
-![Spectrogram Example](docs/_images/spectrogram_graphic.png)
+<img src="docs/_images/spectrogram_graphic.png" alt="Spectrogram Example" width="60%">
+
+*Example of a spectrogram visualization showing frequency content over time*
 
 **Dual Audio Viewer** (when using `view_with()`):
 - Overlaid waveform display showing both audio files simultaneously
@@ -156,7 +158,9 @@ The viewer provides:
 - Zoom functionality to compare specific time ranges
 - Full waveform view to see both audios over their entire duration
 
-![Dual Waveform Example](docs/_images/dual_waveform_graphic.png)
+<img src="docs/_images/dual_waveform_graphic.png" alt="Dual Waveform Example" width="60%">
+
+*Example of dual audio waveform comparison with overlaid waveforms*
 
 ## Examples
 
