@@ -24,8 +24,13 @@ A Pydub-based audio library for introductory computer science courses. This libr
 
 ### Install Dependencies
 
+This project is designed to work in the IDE Thonny. In the Thonny package manager
+(found in the tools dropdown menu) search for and install the packages 'pydub,'
+'numpy,' 'matplotlib,' and 'simpleaudiohamiltoncs.'
+
+Pip Install:
 ```bash
-pip install pydub numpy matplotlib
+pip install pydub numpy matplotlib simpleaudiohamiltoncs
 ```
 
 **Note**: pydub requires ffmpeg for some audio formats. Install ffmpeg separately if needed:
