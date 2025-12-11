@@ -125,7 +125,7 @@ class AudioViewer:
             self.entry_end = tk.Entry(controls, width=6)
             self.entry_end.grid(row=0, column=5)
             
-            tk.Button(controls, text="Zoomed Waveform", command=self.plot_zoom).grid(row=0, column=6, padx=5)
+            tk.Button(controls, text="Zoom Waveform", command=self.plot_zoom).grid(row=0, column=6, padx=5)
             
             tk.Button(controls, text="Peak Amplitude", command=self.show_peak).grid(row=0, column=1, padx=5)
             
