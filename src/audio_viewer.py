@@ -91,6 +91,9 @@ class AudioViewer:
         # Controls
         self.make_controls()
 
+        # Display full waveform by default
+        self.plot_waveform()
+
         self._root.mainloop()
 
     def make_controls(self):
